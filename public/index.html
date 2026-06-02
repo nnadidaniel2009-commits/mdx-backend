@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>MEDANIXX — Smarter Study. Better Results.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" />
+
+    <style>
+        /* ═══════════════════════════════════════════════
+           DESIGN TOKENS SYSTEM (DYNAMIC THEMING)
+        ═══════════════════════════════════════════════ */
+        :root {
+            /* DEFAULT DARK MODE TOKENS */
+            --bg-outer:       #040608;
+            --bg-shell:       #080c14;
+            --bg-surface:     #0d1220;
+            --bg-card:        #111827;
+            --border-color:   rgba(255,255,255,0.08);
+            --text-primary:   #ffffff;
+            --text-secondary: #6c7a9c;
+            --accent-blue:    #3b82f6;
+            --shadow:         transparent;
+            
+            --danger:    #f0516a;
+            --radius:    16px;
+            --font-head: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+
+        body.light-theme {
+            /* POLISHED ULTRA-CONTRAST LIGHT MODE TOKENS */
+            --bg-outer:       #cbd5e1;
+            --bg-shell:       #ffffff;
+            --bg-surface:     #f8fafc;
+            --bg-card:        #f1f5f9;
+            --border-color:   #cbd5e1;
+            --text-primary:   #0f172a;   
+            --text-secondary: #334155;   
+            --accent-blue:    #2563eb;   
+            --shadow:         rgba(0, 0, 0, 0.06);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            background-color: var(--bg-outer) !important;
+            color: var(--text-primary) !important;
+            font-family: var(--font-body);
+            font-size: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        /* Global Theme Overrides to completely prevent hardcoding blocks */
+        h1, h2, h3, h4, h5, h6, b, strong, #welcome-username-heading {
+            color: var(--text-primary) !important;
+        }
+        p, span, small, label {
+            color: var(--text-secondary) !important;
+        }
+
+        /* ═══════════════════════════════════════════════
+           PHONE SHELL CONTAINER
+        ═══════════════════════════════════════════════ */
+        #shell {
+            width: 100%;
+            max-width: 390px;          
+            height: 90vh;              
+            max-height: 844px; 
+            margin: auto;        
+            background: var(--bg-shell) !important;
+            border-radius: 44px;
+            border: 1.5px solid var(--border-color) !important;
+            box-shadow: 0 12px 40px var(--shadow), 0 40px 120px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        /* Phone Camera Notch Overlay */
+        #shell::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 126px; height: 34px;
+            background: #040608;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+
+        /* ═══════════════════════════════════════════════
+           APP LAYOUT CONTAINER
+        ═══════════════════════════════════════════════ */
+        #app-content {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding-top: 44px; 
+            margin-bottom: 64px; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        .view-screen {
+            display: none; /* Controlled dynamically via JS switchScreen */
+            width: 100%;
+            height: 100%;
+            padding: 16px 24px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* ═══════════════════════════════════════════════
+           UI DYNAMIC CARDS
+        ═══════════════════════════════════════════════ */
+        .stats-card, .inner-info-box {
+            background: var(--bg-surface) !important;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color) !important;
+            width: 100%;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            background: var(--bg-surface);
+            margin-bottom: 20px;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .dropzone:hover { border-color: var(--accent-blue); }
+
+        /* ═══════════════════════════════════════════════
+           PREMIUM FULL SCREEN AI CHAT
+        ═══════════════════════════════════════════════ */
+        #chat-view {
+            flex-direction: column;
+            height: 100%;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+
+        .msg { display: flex; width: 100%; }
+        .msg-bubble { max-width: 80%; padding: 12px 16px; font-size: 14px; line-height: 1.45; }
+        
+        .msg-ai { justify-content: flex-start; }
+        .msg-ai .msg-bubble { 
+            background-color: var(--bg-surface) !important; 
+            color: var(--text-primary) !important; 
+            border-radius: 16px 16px 16px 4px; 
+            border: 1px solid var(--border-color); 
+        }
+
+        .msg-user { justify-content: flex-end; }
+        .msg-user .msg-bubble { 
+            background-color: var(--accent-blue) !important; 
+            color: #ffffff !important; 
+            border-radius: 16px 16px 4px 16px; 
+        }
+
+        .chat-input-container { 
+            display: flex; 
+            gap: 8px; 
+            background: var(--bg-surface); 
+            border: 1px solid var(--border-color); 
+            border-radius: 24px; 
+            padding: 6px 6px 6px 16px; 
+            align-items: center; 
+            width: 100%;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+        .chat-input { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            outline: none; 
+            color: var(--text-primary) !important; 
+            font-size: 14px; 
+            padding: 6px 0; 
+        }
+        .chat-send-btn { 
+            background: var(--accent-blue); 
+            color: white; 
+            border: none; 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+        }
+
+        /* ═══════════════════════════════════════════════
+           AUTHENTICATION SCREEN PORTAL
+        ═══════════════════════════════════════════════ */
+        .auth-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-shell) !important;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999;
+            transition: background 0.2s;
+        }
+        .auth-card {
+            background: var(--bg-surface) !important;
+            border: 1px solid var(--border-color) !important;
+            padding: 2rem 1.5rem; border-radius: 16px;
+            width: 90%; text-align: center;
+        }
+        .auth-form input {
+            width: 100%; padding: 0.75rem 1rem; margin-bottom: 1rem;
+            background: var(--bg-shell) !important; 
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px; 
+            color: var(--text-primary) !important;
+        }
+        .auth-form input:focus { outline: none; border-color: var(--accent-blue); }
+        .auth-form button {
+            width: 100%; padding: 0.75rem; background: var(--accent-blue);
+            border: none; border-radius: 8px; color: white !important; font-weight: bold; cursor: pointer;
+        }
+        .auth-toggle { margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-secondary) !important; }
+        .auth-toggle span { color: var(--accent-blue) !important; cursor: pointer; font-weight: bold; }
+
+        /* ═══════════════════════════════════════════════
+           UNIVERSAL LOWER MENUBAR DOCK
+        ═══════════════════════════════════════════════ */
+        .nav-bar {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 64px;
+            display: flex; justify-content: space-around; align-items: center;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            z-index: 10;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .nav-bar button {
+            background: none; border: none; font-size: 14px; cursor: pointer; padding: 8px; transition: color 0.2s;
+        }
+    </style>    
+</head>
+<body>
+    <div id="shell">
+        
+        <div id="auth-screen" class="auth-container">
+            <div class="auth-card">
+                <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                    <img src="logo.png" alt="Medanixx Logo" style="width: 85px; height: 85px; border-radius: 20px; box-shadow: 0 0 25px rgba(91,110,245,0.4); border: 1px solid var(--border-color);">
+                </div> 
+                <h2 id="auth-title">Welcome to MEDANIXX</h2>
+                <p id="auth-subtitle">Sign in to track your 9 semester courses</p>
+                <div class="auth-form">
+                    <input type="text" id="auth-username" placeholder="Enter username..." autocomplete="off">
+                    <input type="password" id="auth-password" placeholder="Enter password...">
+                    <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1rem;">
+                        <span id="toggle-password-visibility" style="font-size: 0.8rem; cursor: pointer; user-select: none;">👁️ Show Password</span>
+                    </div>
+                    <button id="auth-primary-btn">Log In</button>
+                </div>
+                <p class="auth-toggle">Don't have an account? <span id="auth-toggle-link">Sign Up</span></p>
+            </div>
+        </div>
+
+        <main id="app-content">
+            
+            <div id="home-view" class="view-screen" style="display: block;">
+                <header style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <div>
+                        <h1 id="welcome-username-heading" style="font-family: 'Syne', sans-serif; font-weight: 700; font-size: 24px;">Welcome back, Student</h1>
+                        <p style="font-size: 14px; margin: 4px 0 0 0;">Ready for today's study blocks?</p>
+                    </div>
+                    <button id="theme-toggle-btn" style="background: var(--bg-surface); border: 1px solid var(--border-color); font-size: 1.1rem; cursor: pointer; padding: 6px 10px; border-radius: 10px; color: var(--text-primary) !important;">☀️</button>
+                </header>
+                
+                <div class="stats-card">
+                    <h3 style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Daily Streak</h3>
+                    <p style="font-size: 28px; font-weight: 700; margin: 8px 0 0 0; color: var(--accent-blue) !important;"><span id="user-streak-count" style="color: inherit !important;">1</span> Day 🔥</p>
+                </div>
+                
+                <div class="dropzone">
+                    <p style="margin: 0; font-size: 14px; font-weight: 600;">Drop study PDFs or lecture notes here</p>
+                    <span style="font-size: 11px; display: block; margin-top: 4px;">Supports up to 9 courses simultaneously</span>
+                </div>
+            </div>
+
+            <div id="decks-view" class="view-screen">
+                <header style="margin-bottom: 24px;">
+                    <h1 style="font-family: 'Syne', sans-serif; font-size: 24px; margin: 0;">Study Decks</h1>
+                    <p style="font-size: 14px; margin: 4px 0 0 0;">Access your compiled course materials</p>
+                </header>
+                <div class="inner-info-box" style="text-align: center;">
+                    📚 Your 9 digitized course modules will load here soon.
+                </div>
+            </div>
+
+            <div id="chat-view" class="view-screen">
+                <header style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0;">
+                    <h1 style="font-family: 'Syne', sans-serif; font-size: 22px; margin: 0;">Medanixx AI</h1>
+                    <p style="font-size: 12px; margin: 4px 0 0 0;">Ask anything about your 9 modules</p>
+                </header>
+                
+                <div class="chat-history">
+                    <div class="msg msg-ai">
+                        <div class="msg-bubble" id="chat-greeting-bubble">
+                            Hey there! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" placeholder="Ask a question..." />
+                    <button class="chat-send-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="settings-view" class="view-screen">
+                <header style="margin-bottom: 24px;">
+                    <h1 style="font-family: 'Syne', sans-serif; font-size: 24px; margin: 0;">Settings</h1>
+                    <p style="font-size: 14px; margin: 4px 0 0 0;">Manage your ecosystem configurations</p>
+                </header>
+                <div class="inner-info-box" style="text-align: center;">
+                    ⚙️ App configurations and database connections.
+                </div>
+                
+                <div style="padding: 1.25rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">Finished studying for today?</p>
+                    <button id="app-logout-btn" style="width: 100%; padding: 0.65rem; background: var(--danger); border: none; border-radius: 8px; color: white !important; font-weight: bold; cursor: pointer;">
+                        Log Out Account
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <nav id="bottom-nav" class="nav-bar">
+            <button id="nav-home" style="color: var(--accent-blue); font-weight: bold;">Home</button>
+            <button id="nav-decks" style="color: var(--text-secondary); font-weight: normal;">Decks</button>
+            <button id="nav-settings" style="color: var(--text-secondary); font-weight: normal;">Settings</button>
+            <button id="nav-chat" style="color: var(--text-secondary); font-weight: normal;">Chat</button> 
+        </nav>
+
+    </div>
+
+    <script>
+        // Core View Controllers
+        const buttons = {
+            home: document.getElementById('nav-home'),
+            decks: document.getElementById('nav-decks'),
+            settings: document.getElementById('nav-settings'),
+            chat: document.getElementById('nav-chat')
+        };
+
+        const screens = {
+            home: document.getElementById('home-view'),
+            decks: document.getElementById('decks-view'),
+            settings: document.getElementById('settings-view'),
+            chat: document.getElementById('chat-view')
+        };
+
+        function switchScreen(targetScreen) {
+            Object.keys(screens).forEach(key => {
+                if (screens[key]) screens[key].style.display = 'none';
+                if (buttons[key]) {
+                    buttons[key].style.color = 'var(--text-secondary)';
+                    buttons[key].style.fontWeight = 'normal';
+                }
+            });
+
+            if (screens[targetScreen]) {
+                screens[targetScreen].style.display = (targetScreen === 'chat') ? 'flex' : 'block';
+            }
+            if (buttons[targetScreen]) {
+                buttons[targetScreen].style.color = 'var(--accent-blue)';
+                buttons[targetScreen].style.fontWeight = 'bold';
+            }
+        }
+
+        if (buttons.home) buttons.home.addEventListener('click', () => switchScreen('home'));
+        if (buttons.decks) buttons.decks.addEventListener('click', () => switchScreen('decks'));
+        if (buttons.settings) buttons.settings.addEventListener('click', () => switchScreen('settings'));
+        if (buttons.chat) buttons.chat.addEventListener('click', () => switchScreen('chat'));
+
+        // Authentication Handler System
+        let currentUser = "Student"; 
+        let isSignUpMode = false;
+
+        const authScreen = document.getElementById('auth-screen');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        const authPrimaryBtn = document.getElementById('auth-primary-btn');
+        const authToggleLink = document.getElementById('auth-toggle-link');
+        const usernameInput = document.getElementById('auth-username');
+        const passwordInput = document.getElementById('auth-password');
+
+        function updateUIIdentity() {
+            const welcomeHeading = document.getElementById('welcome-username-heading');
+            if (welcomeHeading) welcomeHeading.innerText = `Welcome back, ${currentUser}`;
+            
+            const chatGreeting = document.getElementById('chat-greeting-bubble');
+            if (chatGreeting) chatGreeting.innerText = `Hey ${currentUser}! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯`;
+            calculateUserStreak();
+        }
+
+        authToggleLink.addEventListener('click', () => {
+            isSignUpMode = !isSignUpMode;
+            usernameInput.value = '';
+            passwordInput.value = '';
+            passwordInput.type = 'password';
+            document.getElementById('toggle-password-visibility').innerText = '👁️ Show Password';
+            
+            if (isSignUpMode) {
+                authTitle.innerText = "Create Account";
+                authSubtitle.innerText = "Register your profile to start studying";
+                authPrimaryBtn.innerText = "Register & Enter";
+                authToggleLink.innerText = "Log In";
+            } else {
+                authTitle.innerText = "Welcome to MEDANIXX";
+                authSubtitle.innerText = "Sign in to track your 9 semester courses";
+                authPrimaryBtn.innerText = "Log In";
+                authToggleLink.innerText = "Sign Up";
+            }
+        });
+
+        authPrimaryBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username || !password) {
+                alert("Please fill in both fields!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('medanixx_users')) || {};
+
+            if (isSignUpMode) {
+                if (users[username]) {
+                    alert("Username already registered!");
+                    return;
+                }
+                users[username] = { password };
+                localStorage.setItem('medanixx_users', JSON.stringify(users));
+            } else {
+                if (!users[username] || users[username].password !== password) {
+                    alert("Invalid credentials! Please check fields or sign up. ❌");
+                    return;
+                }
+            }
+
+            currentUser = username;
+            localStorage.setItem('medanixx_active_session', username);
+            updateUIIdentity();
+            authScreen.style.display = "none";
+        });
+
+        const togglePasswordLink = document.getElementById('toggle-password-visibility');
+        if (togglePasswordLink && passwordInput) {
+            togglePasswordLink.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    togglePasswordLink.innerText = '🙈 Hide Password';
+                } else {
+                    passwordInput.type = 'password';
+                    togglePasswordLink.innerText = '👁️ Show Password';
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeSession = localStorage.getItem('medanixx_active_session');
+            if (activeSession) {
+                currentUser = activeSession;
+                updateUIIdentity();
+                authScreen.style.display = "none";
+            }
+        });
+
+        function calculateUserStreak() {
+            if (!currentUser || currentUser === "Student") return;
+            const streakKey = `medanixx_streak_${currentUser}`;
+            const lastLoginKey = `medanixx_last_login_${currentUser}`;
+            const todayStr = new Date().toDateString(); 
+            let userStreak = parseInt(localStorage.getItem(streakKey)) || 1;
+            localStorage.setItem(streakKey, userStreak);
+            localStorage.setItem(lastLoginKey, todayStr);
+            const streakDisplay = document.getElementById('user-streak-count');
+            if (streakDisplay) streakDisplay.innerText = userStreak;
+        }
+
+        // 💬 PREMIUM LIVE CHAT API INTEGRATION INTERFACE
+        async function handleSendMessage() {
+            const chatInput = document.querySelector('.chat-input');
+            const chatHistory = document.querySelector('.chat-history');
+            
+            if (!chatInput || !chatHistory) return;
+
+            const text = chatInput.value.trim();
+            if (!text) return; 
+
+            // Append User Message Node
+            const userMsg = document.createElement('div');
+            userMsg.className = 'msg msg-user';
+            userMsg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+            chatHistory.appendChild(userMsg);
+
+            chatInput.value = '';
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            // Append Pending AI Loading Container Indicator
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'msg msg-ai';
+            aiMsg.innerHTML = `<div class="msg-bubble">Medanixx AI is formulating answer... ⚡</div>`;
+            chatHistory.appendChild(aiMsg);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            const systemRules = encodeURIComponent(
+                `You are Medanixx AI, an elite academic tutor built specifically for ${currentUser}. ` +
+                "Your core job is to help the user master their 9 semester courses. " +
+                "Keep responses clean, organized, structured, and use emojis like 📚, ⚡, 🧠, or 🩺."
+            );
+
+            const API_URL = `https://text.pollinations.ai/prompt/${encodeURIComponent(text)}?system=${systemRules}`;
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Network response failed");
+                
+                let liveAiResponse = await response.text();
+
+                // Format markdown text blocks into rich HTML format tags safely
+                liveAiResponse = liveAiResponse
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+
+                aiMsg.innerHTML = `<div class="msg-bubble">${liveAiResponse}</div>`;
+
+            } catch (error) {
+                console.error("API Connection Error:", error);
+                aiMsg.innerHTML = `<div class="msg-bubble" style="color: var(--danger) !important;">Connection hiccup. Please click send again! ❌</div>`;
+            }
+
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        const targetInput = document.querySelector('.chat-input');
+        const targetBtn = document.querySelector('.chat-send-btn');
+
+        if (targetBtn) targetBtn.addEventListener('click', handleSendMessage);
+        if (targetInput) {
+            targetInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') handleSendMessage();
+            });
+        }
+
+        // Persistent Theme Switcher Engine Link
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        if (localStorage.getItem('mdx_theme') === 'light') {
+            document.body.classList.add('light-theme');
+            if (themeToggleBtn) themeToggleBtn.innerText = '🌙';
+        }
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                const isLight = document.body.classList.contains('light-theme');
+                themeToggleBtn.innerText = isLight ? '🌙' : '☀️';
+                localStorage.setItem('mdx_theme', isLight ? 'light' : 'dark');
+            });
+        }
+
+        const logoutBtn = document.getElementById('app-logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('medanixx_active_session');
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
