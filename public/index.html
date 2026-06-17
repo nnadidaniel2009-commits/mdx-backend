@@ -128,13 +128,13 @@
         }
         .dropzone:hover { border-color: var(--accent-blue); }
 
+        /* ── CHAT ── */
         #chat-view {
             flex-direction: column;
             height: 100%;
             padding: 16px 20px;
             overflow: hidden;
         }
-
         .chat-history {
             flex: 1;
             overflow-y: auto;
@@ -163,6 +163,23 @@
             border-radius: 16px 16px 4px 16px;
         }
 
+        /* ── Resend / Retry button on failed AI messages ── */
+        .msg-retry-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--accent-blue) !important;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
+        }
+        .msg-retry-btn:hover { background: rgba(59,130,246,0.12); }
+
         .chat-input-container {
             display: flex;
             gap: 8px;
@@ -174,6 +191,10 @@
             width: 100%;
             flex-shrink: 0;
             margin-bottom: 4px;
+            transition: border-color 0.2s;
+        }
+        .chat-input-container:focus-within {
+            border-color: var(--accent-blue);
         }
         .chat-input {
             flex: 1;
@@ -195,8 +216,13 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+            flex-shrink: 0;
         }
+        .chat-send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+        .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
+        /* ── AUTH ── */
         .auth-container {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -217,21 +243,65 @@
             border: 1px solid var(--border-color) !important;
             border-radius: 8px;
             color: var(--text-primary) !important;
+            font-family: var(--font-body);
+            font-size: 14px;
+            transition: border-color 0.2s;
         }
-        .auth-form input:focus { outline: none; border-color: var(--accent-blue); }
+        .auth-form input:focus { outline: none; border-color: var(--accent-blue) !important; }
         .auth-form button {
             width: 100%; padding: 0.75rem; background: var(--accent-blue);
-            border: none; border-radius: 8px; color: white !important; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 8px; color: white !important;
+            font-weight: bold; cursor: pointer; font-size: 14px;
+            font-family: var(--font-body);
         }
         .auth-toggle { margin-top: 1.2rem; font-size: 0.85rem; color: var(--text-secondary) !important; }
         .auth-toggle span { color: var(--accent-blue) !important; cursor: pointer; font-weight: bold; }
 
+        /* ── AUTH error/success feedback ── */
+        #auth-feedback {
+            display: none;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        #auth-feedback.error {
+            background: rgba(240,81,106,0.12);
+            border: 1px solid var(--danger);
+            color: var(--danger) !important;
+        }
+        #auth-feedback.success {
+            background: rgba(16,185,129,0.12);
+            border: 1px solid var(--success);
+            color: var(--success) !important;
+        }
+
+        /* ── Remember me checkbox ── */
+        .auth-remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+        .auth-remember input[type="checkbox"] {
+            width: 16px; height: 16px;
+            margin: 0; padding: 0;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+        .auth-remember label {
+            font-size: 13px;
+            color: var(--text-secondary) !important;
+            cursor: pointer;
+            user-select: none;
+        }
+
         .nav-bar {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
+            bottom: 0; left: 0;
+            width: 100%; height: 80px;
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -243,13 +313,9 @@
         }
 
         .nav-tab-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: none; border: none; cursor: pointer;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             gap: 4px;
             color: var(--text-secondary);
             font-size: 10px;
@@ -259,19 +325,13 @@
             border-radius: 14px;
             transition: all 0.2s ease-in-out;
         }
-
         .nav-tab-btn svg {
-            width: 20px;
-            height: 20px;
-            stroke: currentColor;
-            fill: none;
+            width: 20px; height: 20px;
+            stroke: currentColor; fill: none;
             stroke-width: 2.2;
             transition: all 0.2s ease-in-out;
         }
-
-        .nav-tab-btn.active {
-            color: var(--accent-blue) !important;
-        }
+        .nav-tab-btn.active { color: var(--accent-blue) !important; }
 
         .option-btn {
             width: 100%;
@@ -289,7 +349,7 @@
         .option-btn:hover { background: rgba(59, 130, 246, 0.1); }
         .option-btn.selected { border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.2); }
 
-        /* ── Login page animations ── */
+        /* ── Animations ── */
         @keyframes fadeSlideUp {
             from { opacity: 0; transform: translateY(24px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -303,19 +363,21 @@
             100% { background-position:  200% center; }
         }
         @keyframes borderPulse {
-            0%, 100% { border-color: rgba(59,130,246,0.4); }
-            50%       { border-color: rgba(59,130,246,0.9); }
+            0%, 100% { border-color: rgba(59,130,246,0.4) !important; }
+            50%       { border-color: rgba(59,130,246,0.9) !important; }
+        }
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: translateY(0);    opacity: 0.4; }
+            40%            { transform: translateY(-6px); opacity: 1;   }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
         }
 
-        .auth-card {
-            animation: fadeSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
-        }
-        #auth-logo-img {
-            animation: logoPulse 2.8s ease-in-out infinite;
-        }
-        .auth-form input:focus {
-            animation: borderPulse 1.8s ease-in-out infinite;
-        }
+        .auth-card { animation: fadeSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+        #auth-logo-img { animation: logoPulse 2.8s ease-in-out infinite; }
+
         #auth-primary-btn {
             background: linear-gradient(90deg, #1d4ed8, #3b82f6, #7c3aed, #3b82f6, #1d4ed8) !important;
             background-size: 300% auto !important;
@@ -328,11 +390,7 @@
         }
         #auth-primary-btn:active { transform: translateY(0); animation: none; }
 
-        /* ── Chat typing indicator ── */
-        @keyframes dotBounce {
-            0%, 80%, 100% { transform: translateY(0);    opacity: 0.4; }
-            40%            { transform: translateY(-6px); opacity: 1;   }
-        }
+        /* ── Typing indicator dots ── */
         .typing-indicator {
             display: flex;
             align-items: center;
@@ -340,8 +398,7 @@
             padding: 4px 2px;
         }
         .typing-indicator span {
-            width: 7px;
-            height: 7px;
+            width: 7px; height: 7px;
             border-radius: 50%;
             background: var(--accent-blue);
             display: inline-block;
@@ -351,18 +408,34 @@
         .typing-indicator span:nth-child(2) { animation-delay: 0.18s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.36s; }
 
-        /* ── Streak dot styles ── */
-        .streak-dot {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
+        /* ── Progress bar (send animation) ── */
+        .chat-progress-bar-wrap {
+            width: 100%;
+            height: 2px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 8px;
             flex-shrink: 0;
-            position: relative;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .chat-progress-bar-wrap.active { opacity: 1; }
+        .chat-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-blue), #7c3aed);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* ── Streak dots ── */
+        .streak-dot {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700;
+            flex-shrink: 0; position: relative;
         }
         .streak-dot.active {
             background: linear-gradient(135deg, var(--accent-blue), #7c3aed);
@@ -380,1365 +453,1166 @@
             color: var(--text-secondary);
         }
         .streak-dot-label {
-            font-size: 9px;
-            text-align: center;
+            font-size: 9px; text-align: center;
             margin-top: 4px;
             color: var(--text-secondary) !important;
         }
     </style>
 </head>
 <body>
-    <div id="shell">
+<div id="shell">
 
-        <!-- AUTH SCREEN -->
-        <div id="auth-screen" class="auth-container">
-            <div class="auth-card">
-                <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;">
-                    <img id="auth-logo-img" src="logo.png" alt="Medanixx Logo" style="width: 85px; height: 85px; border-radius: 20px; border: 1px solid var(--border-color);">
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-card">
+            <div style="margin-bottom:1.5rem;display:flex;justify-content:center;">
+                <img id="auth-logo-img" src="logo.png" alt="Medanixx Logo"
+                     style="width:85px;height:85px;border-radius:20px;border:1px solid var(--border-color);">
+            </div>
+            <h2 id="auth-title" style="margin-bottom:4px;">Welcome to MEDANIXX</h2>
+            <p id="auth-subtitle" style="font-size:13px;margin-bottom:1.2rem;">Sign in with your academic email</p>
+
+            <div class="auth-form">
+                <input type="email" id="auth-email" placeholder="Academic email address..." autocomplete="email">
+                <input type="text" id="auth-username" placeholder="Choose a display name..." autocomplete="off" style="display:none;">
+                <input type="password" id="auth-password" placeholder="Password..." autocomplete="current-password">
+
+                <div style="text-align:right;margin-top:-0.5rem;margin-bottom:0.75rem;">
+                    <span id="toggle-password-visibility"
+                          style="font-size:0.8rem;cursor:pointer;user-select:none;color:var(--accent-blue)!important;">
+                        👁️ Show Password
+                    </span>
                 </div>
-                <h2 id="auth-title">Welcome to MEDANIXX</h2>
-                <p id="auth-subtitle">Sign in via academic email portal</p>
-                <div class="auth-form">
-                    <input type="email" id="auth-email" placeholder="Enter academic email..." autocomplete="off">
-                    <input type="text" id="auth-username" placeholder="Choose your display username..." autocomplete="off">
-                    <input type="password" id="auth-password" placeholder="Enter security password...">
-                    <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 1rem;">
-                        <span id="toggle-password-visibility" style="font-size: 0.8rem; cursor: pointer; user-select: none;">👁️ Show Password</span>
+
+                <!-- Remember me -->
+                <div class="auth-remember">
+                    <input type="checkbox" id="auth-remember-me" checked>
+                    <label for="auth-remember-me">Keep me signed in</label>
+                </div>
+
+                <!-- Feedback -->
+                <div id="auth-feedback"></div>
+
+                <button id="auth-primary-btn">Log In</button>
+            </div>
+
+            <p class="auth-toggle">
+                Don't have an account? <span id="auth-toggle-link">Sign Up</span>
+            </p>
+        </div>
+    </div>
+
+    <main id="app-content">
+
+        <!-- HOME TAB -->
+        <div id="home-view" class="view-screen" style="display:block;">
+            <header style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
+                <div>
+                    <h1 id="welcome-username-heading" style="font-family:'Syne',sans-serif;font-weight:700;font-size:24px;">Welcome back</h1>
+                    <p style="font-size:14px;margin:4px 0 0 0;">Ready for today's study blocks?</p>
+                </div>
+                <button id="theme-toggle-btn"
+                        style="background:var(--bg-surface);border:1px solid var(--border-color);font-size:1.1rem;cursor:pointer;padding:6px 10px;border-radius:10px;color:var(--text-primary)!important;">
+                    ☀️
+                </button>
+            </header>
+
+            <!-- STREAK CARD -->
+            <div class="stats-card" style="position:relative;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <h3 style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Daily Streak</h3>
+                        <p style="font-size:28px;font-weight:700;margin:6px 0 2px 0;color:var(--accent-blue)!important;">
+                            <span id="user-streak-count" style="color:inherit!important;">0</span>
+                            <span id="streak-unit" style="color:inherit!important;font-size:20px;"> Day 🔥</span>
+                        </p>
+                        <p id="streak-status-label" style="font-size:12px;margin:0;">Log in daily to build your streak!</p>
                     </div>
-                    <button id="auth-primary-btn">Log In</button>
+                    <div id="streak-badge" style="display:none;flex-direction:column;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--accent-blue),#7c3aed);box-shadow:0 0 16px rgba(59,130,246,0.4);">
+                        <span id="streak-badge-icon" style="font-size:22px;line-height:1;">🥉</span>
+                        <span id="streak-badge-label" style="font-size:8px;font-weight:700;color:white!important;margin-top:1px;">3 DAY</span>
+                    </div>
                 </div>
-                <p class="auth-toggle">Don't have an account? <span id="auth-toggle-link">Sign Up</span></p>
+                <div style="margin-top:14px;">
+                    <p style="font-size:11px;margin:0 0 8px 0;text-transform:uppercase;letter-spacing:0.8px;">Last 7 Days</p>
+                    <div id="streak-dot-trail" style="display:flex;gap:6px;align-items:flex-start;flex-wrap:nowrap;"></div>
+                </div>
+            </div>
+
+            <!-- PDF UPLOAD -->
+            <div class="dropzone" onclick="triggerFilePicker()">
+                <p style="margin:0;font-size:14px;font-weight:600;">📁 Tap to upload lecture PDFs or Text notes</p>
+                <span style="font-size:11px;display:block;margin-top:4px;">Extracted text will load into AI memory</span>
+                <input type="file" id="pdf-file-picker" accept=".pdf,.txt" style="display:none;" onchange="processLocalFile(event)">
+            </div>
+
+            <div class="inner-info-box" style="margin-bottom:20px;">
+                <h4 style="font-size:13px;margin-bottom:4px;color:var(--accent-blue)!important;">💡 What does the document uploader do?</h4>
+                <p style="font-size:12px;line-height:1.4;">Uploading your lecture or syllabus feeds text directly into the AI's memory. When you switch to the <strong>Chat</strong> tab, the assistant will answer from your material instead of generic information!</p>
+            </div>
+
+            <div id="file-upload-status" class="inner-info-box" style="display:none;border-color:var(--success)!important;">
+                ✅ Document loaded successfully.
             </div>
         </div>
 
-        <main id="app-content">
+        <!-- DECKS TAB -->
+        <div id="decks-view" class="view-screen">
+            <header style="margin-bottom:24px;">
+                <h1 style="font-family:'Syne',sans-serif;font-size:24px;margin:0;">Study Decks</h1>
+                <p style="font-size:14px;margin:4px 0 0 0;">Access your compiled course materials</p>
+            </header>
+            <div class="inner-info-box" style="text-align:center;">
+                📚 Your 9 digitized course modules will load here soon.
+            </div>
+        </div>
 
-            <!-- HOME TAB -->
-            <div id="home-view" class="view-screen" style="display: block;">
-                <header style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+        <!-- EXAM TAB -->
+        <div id="exam-view" class="view-screen">
+            <header style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);padding-bottom:12px;">
+                <div>
+                    <h1 style="font-family:'Syne',sans-serif;font-size:22px;margin:0;">Exam Block</h1>
+                    <p id="exam-course-title" style="font-size:12px;margin:2px 0 0 0;">Simulation Engine Modality</p>
+                </div>
+                <div id="exam-timer-clock" style="background:var(--danger);color:white;padding:6px 12px;border-radius:20px;font-weight:bold;font-size:13px;">⏱️ 30:00</div>
+            </header>
+
+            <div id="exam-setup-box" style="padding:4px 0 16px;">
+                <div id="exam-dropzone" class="dropzone" onclick="document.getElementById('exam-pdf-picker').click()" style="margin-bottom:16px;padding:24px;">
+                    <div style="font-size:28px;margin-bottom:8px;">📄</div>
+                    <p style="margin:0;font-size:14px;font-weight:600;color:var(--text-primary)!important;">Upload your course material</p>
+                    <span style="font-size:11px;display:block;margin-top:4px;">AI will generate up to 70 exam questions from your PDF or text file</span>
+                    <input type="file" id="exam-pdf-picker" accept=".pdf,.txt" style="display:none;" onchange="handleExamFileUpload(event)">
+                </div>
+
+                <div id="exam-file-badge" style="display:none;background:var(--bg-surface);border:1px solid var(--success);border-radius:10px;padding:10px 14px;margin-bottom:16px;align-items:center;gap:10px;">
+                    <span style="font-size:18px;">✅</span>
                     <div>
-                        <h1 id="welcome-username-heading" style="font-family: 'Syne', sans-serif; font-weight: 700; font-size: 24px;">Welcome back</h1>
-                        <p style="font-size: 14px; margin: 4px 0 0 0;">Ready for today's study blocks?</p>
+                        <p id="exam-file-name" style="font-size:13px;font-weight:600;margin:0;color:var(--text-primary)!important;">file.txt</p>
+                        <p style="font-size:11px;margin:0;">Ready to generate questions</p>
                     </div>
-                    <button id="theme-toggle-btn" style="background: var(--bg-surface); border: 1px solid var(--border-color); font-size: 1.1rem; cursor: pointer; padding: 6px 10px; border-radius: 10px; color: var(--text-primary) !important;">☀️</button>
-                </header>
-
-                <!-- ★ UPGRADED STREAK CARD ★ -->
-                <div class="stats-card" style="position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <h3 style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Daily Streak</h3>
-                            <p style="font-size: 28px; font-weight: 700; margin: 6px 0 2px 0; color: var(--accent-blue) !important;">
-                                <span id="user-streak-count" style="color: inherit !important;">0</span>
-                                <span id="streak-unit" style="color: inherit !important; font-size: 20px;"> Day 🔥</span>
-                            </p>
-                            <p id="streak-status-label" style="font-size: 12px; margin: 0; color: var(--text-secondary) !important;">Log in daily to build your streak!</p>
-                        </div>
-                        <!-- Badge unlocked at milestones -->
-                        <div id="streak-badge" style="display: none; flex-direction: column; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-blue), #7c3aed); box-shadow: 0 0 16px rgba(59,130,246,0.4);">
-                            <span id="streak-badge-icon" style="font-size: 22px; line-height: 1;">🥉</span>
-                            <span id="streak-badge-label" style="font-size: 8px; font-weight: 700; color: white !important; margin-top: 1px;">3 DAY</span>
-                        </div>
-                    </div>
-
-                    <!-- 7-day dot trail -->
-                    <div style="margin-top: 14px;">
-                        <p style="font-size: 11px; margin: 0 0 8px 0; color: var(--text-secondary) !important; text-transform: uppercase; letter-spacing: 0.8px;">Last 7 Days</p>
-                        <div id="streak-dot-trail" style="display: flex; gap: 6px; align-items: flex-start; flex-wrap: nowrap;"></div>
-                    </div>
+                    <button onclick="clearExamFile()" style="margin-left:auto;background:none;border:none;font-size:16px;cursor:pointer;color:var(--text-secondary);">✕</button>
                 </div>
 
-                <!-- PDF UPLOAD -->
-                <div class="dropzone" onclick="triggerFilePicker()">
-                    <p style="margin: 0; font-size: 14px; font-weight: 600;">📁 Tap to select/upload lecture PDFs or Text notes</p>
-                    <span style="font-size: 11px; display: block; margin-top: 4px;">Extracted text contexts will automatically load into AI memory</span>
-                    <input type="file" id="pdf-file-picker" accept=".pdf,.txt" style="display: none;" onchange="processLocalFile(event)">
-                </div>
+                <button id="exam-ai-btn" onclick="generateAIExam()" disabled
+                        style="width:100%;background:linear-gradient(90deg,#1d4ed8,#7c3aed);color:white;border:none;padding:13px 24px;border-radius:12px;font-weight:bold;cursor:not-allowed;margin-bottom:4px;opacity:0.45;font-size:14px;transition:opacity 0.2s,transform 0.15s;">
+                    ✨ Generate AI Exam from My Document
+                </button>
+                <p style="font-size:11px;text-align:center;margin-top:8px;">Upload a document above to unlock exam generation</p>
 
-                <div class="inner-info-box" style="margin-bottom: 20px;">
-                    <h4 style="font-size: 13px; margin-bottom: 4px; color: var(--accent-blue) !important;">💡 What does the document uploader do?</h4>
-                    <p style="font-size: 12px; line-height: 1.4;">Uploading your class lecture or syllabus feeds that direct text context directly into the AI's short-term memory block. When you switch to the <strong>Chat</strong> tab, the assistant will prioritize answering questions directly from your material instead of generic web information!</p>
-                </div>
-
-                <div id="file-upload-status" class="inner-info-box" style="display: none; border-color: var(--success) !important;">
-                    ✅ Document loaded successfully into local workspace context memory.
+                <div id="exam-generating-box" style="display:none;text-align:center;padding:24px 0;">
+                    <div class="typing-indicator" style="justify-content:center;margin-bottom:12px;">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <p id="exam-generating-label" style="font-size:13px;margin:0;">Analysing your document...</p>
                 </div>
             </div>
 
-            <!-- DECKS TAB -->
-            <div id="decks-view" class="view-screen">
-                <header style="margin-bottom: 24px;">
-                    <h1 style="font-family: 'Syne', sans-serif; font-size: 24px; margin: 0;">Study Decks</h1>
-                    <p style="font-size: 14px; margin: 4px 0 0 0;">Access your compiled course materials</p>
-                </header>
-                <div class="inner-info-box" style="text-align: center;">
-                    📚 Your 9 digitized course modules will load here soon.
+            <div id="exam-quiz-box" style="display:none;">
+                <div class="inner-info-box">
+                    <span id="exam-question-number" style="font-size:11px;text-transform:uppercase;font-weight:bold;color:var(--accent-blue);">Question 1 of 10</span>
+                    <p id="exam-question-text" style="font-size:15px;font-weight:500;margin-top:8px;color:var(--text-primary)!important;">Loading...</p>
+                </div>
+                <div id="exam-options-list"></div>
+                <div style="display:flex;justify-content:space-between;margin-top:16px;">
+                    <button id="exam-prev-btn" onclick="navigateExam(-1)"
+                            style="background:var(--bg-surface);border:1px solid var(--border-color);color:var(--text-primary);padding:10px 16px;border-radius:8px;cursor:pointer;">Previous</button>
+                    <button id="exam-next-btn" onclick="navigateExam(1)"
+                            style="background:var(--accent-blue);color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:bold;cursor:pointer;">Next</button>
                 </div>
             </div>
 
-            <!-- EXAM TAB -->
-            <div id="exam-view" class="view-screen">
-                <header style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                    <div>
-                        <h1 style="font-family: 'Syne', sans-serif; font-size: 22px; margin: 0;">Exam Block</h1>
-                        <p id="exam-course-title" style="font-size: 12px; margin: 2px 0 0 0;">Simulation Engine Modality</p>
-                    </div>
-                    <div id="exam-timer-clock" style="background: var(--danger); color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px;">⏱️ 30:00</div>
-                </header>
-
-                <div id="exam-setup-box" style="padding: 4px 0 16px;">
-
-                    <!-- PDF Upload Zone -->
-                    <div id="exam-dropzone" class="dropzone" onclick="document.getElementById('exam-pdf-picker').click()" style="margin-bottom: 16px; padding: 24px;">
-                        <div style="font-size: 28px; margin-bottom: 8px;">📄</div>
-                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary) !important;">Upload your course material</p>
-                        <span style="font-size: 11px; display: block; margin-top: 4px;">AI will generate up to 70 exam questions from your PDF or text file</span>
-                        <input type="file" id="exam-pdf-picker" accept=".pdf,.txt" style="display: none;" onchange="handleExamFileUpload(event)">
-                    </div>
-
-                    <!-- Uploaded file indicator -->
-                    <div id="exam-file-badge" style="display: none; background: var(--bg-surface); border: 1px solid var(--success); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; align-items: center; gap: 10px;">
-                        <span style="font-size: 18px;">✅</span>
-                        <div>
-                            <p id="exam-file-name" style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text-primary) !important;">file.txt</p>
-                            <p style="font-size: 11px; margin: 0;">Ready to generate questions</p>
-                        </div>
-                        <button onclick="clearExamFile()" style="margin-left: auto; background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-secondary);">✕</button>
-                    </div>
-
-                    <!-- Action button -->
-                    <button id="exam-ai-btn" onclick="generateAIExam()" disabled style="width: 100%; background: linear-gradient(90deg, #1d4ed8, #7c3aed); color: white; border: none; padding: 13px 24px; border-radius: 12px; font-weight: bold; cursor: not-allowed; margin-bottom: 4px; opacity: 0.45; font-size: 14px; transition: opacity 0.2s, transform 0.15s;">
-                        ✨ Generate AI Exam from My Document
-                    </button>
-                    <p style="font-size: 11px; text-align: center; margin-top: 8px;">Upload a document above to unlock exam generation</p>
-
-                    <!-- AI generation loading state -->
-                    <div id="exam-generating-box" style="display: none; text-align: center; padding: 24px 0;">
-                        <div class="typing-indicator" style="justify-content: center; margin-bottom: 12px;">
-                            <span></span><span></span><span></span>
-                        </div>
-                        <p id="exam-generating-label" style="font-size: 13px; margin: 0;">Analysing your document...</p>
-                    </div>
+            <div id="exam-scorecard-box" style="display:none;text-align:center;">
+                <div class="stats-card">
+                    <h2 style="font-size:20px;font-family:var(--font-head);">Exam Results!</h2>
+                    <p style="font-size:42px;font-weight:800;color:var(--accent-blue)!important;margin:16px 0;" id="exam-final-score">0%</p>
+                    <p id="exam-score-breakdown">You answered 0 out of 10 questions correctly.</p>
                 </div>
+                <button onclick="exitExamReview()"
+                        style="background:var(--bg-surface);border:1px solid var(--border-color);color:var(--text-primary);padding:10px 20px;border-radius:10px;cursor:pointer;width:100%;">
+                    Return to Portal Home
+                </button>
+            </div>
+        </div>
 
-                <div id="exam-quiz-box" style="display: none;">
-                    <div class="inner-info-box">
-                        <span id="exam-question-number" style="font-size: 11px; text-transform: uppercase; font-weight: bold; color: var(--accent-blue);">Question 1 of 10</span>
-                        <p id="exam-question-text" style="font-size: 15px; font-weight: 500; margin-top: 8px; color: var(--text-primary) !important;">Loading...</p>
-                    </div>
-                    <div id="exam-options-list"></div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 16px;">
-                        <button id="exam-prev-btn" onclick="navigateExam(-1)" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px 16px; border-radius: 8px; cursor: pointer;">Previous</button>
-                        <button id="exam-next-btn" onclick="navigateExam(1)" style="background: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">Next</button>
-                    </div>
+        <!-- CHAT TAB -->
+        <div id="chat-view" class="view-screen">
+            <header style="margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-color);flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h1 style="font-family:'Syne',sans-serif;font-size:22px;margin:0;">Medanixx AI</h1>
+                    <p style="font-size:12px;margin:2px 0 0 0;">Ask anything about your 9 courses</p>
                 </div>
+                <!-- Clear chat history button -->
+                <button id="clear-chat-btn" title="Clear chat history"
+                        style="background:none;border:1px solid var(--border-color);padding:5px 10px;border-radius:10px;cursor:pointer;font-size:11px;color:var(--text-secondary)!important;transition:border-color 0.2s;">
+                    🗑️ Clear
+                </button>
+            </header>
 
-                <div id="exam-scorecard-box" style="display: none; text-align: center;">
-                    <div class="stats-card">
-                        <h2 style="font-size: 20px; font-family: var(--font-head);">Exam Results!</h2>
-                        <p style="font-size: 42px; font-weight: 800; color: var(--accent-blue) !important; margin: 16px 0;" id="exam-final-score">0%</p>
-                        <p id="exam-score-breakdown">You answered 0 out of 10 questions correctly.</p>
+            <div class="chat-history" id="chat-history-container">
+                <div class="msg msg-ai">
+                    <div class="msg-bubble" id="chat-greeting-bubble">
+                        Hey there! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯
                     </div>
-                    <button onclick="exitExamReview()" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px 20px; border-radius: 10px; cursor: pointer; width: 100%;">Return to Portal Home</button>
                 </div>
             </div>
 
-            <!-- CHAT TAB -->
-            <div id="chat-view" class="view-screen">
-                <header style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h1 style="font-family: 'Syne', sans-serif; font-size: 22px; margin: 0;">Medanixx AI</h1>
-                        <p style="font-size: 12px; margin: 2px 0 0 0;">Ask anything about your 9 courses</p>
-                    </div>
-                    <button onclick="forceResetKeyInChat()" style="background: rgba(240, 81, 106, 0.15); color: var(--danger); border: 1px solid var(--danger); font-size: 11px; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">🔑 Set Key</button>
-                </header>
-
-                <div class="chat-history">
-                    <div class="msg msg-ai">
-                        <div class="msg-bubble" id="chat-greeting-bubble">
-                            Hey there! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input" placeholder="Ask a question..." />
-                    <button class="chat-send-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
+            <!-- Progress bar shown while waiting for AI response -->
+            <div class="chat-progress-bar-wrap" id="chat-progress-wrap">
+                <div class="chat-progress-bar" id="chat-progress-bar"></div>
             </div>
 
-            <!-- PROFILE TAB -->
-            <div id="profile-view" class="view-screen">
-                <header style="margin-bottom: 20px;">
-                    <h1 style="font-family: 'Syne', sans-serif; font-size: 24px; margin: 0;">User Profile</h1>
-                    <p style="font-size: 14px; margin: 4px 0 0 0;">Your Medanixx student dashboard</p>
-                </header>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chat-input-field" placeholder="Ask a question..." />
+                <button class="chat-send-btn" id="chat-send-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-                <!-- 🪪 PROFILE HEADER CARD -->
-                <div class="profile-card" style="margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div id="avatar-upload-trigger" style="position: relative; cursor: pointer; flex-shrink: 0;">
-                            <div id="profile-avatar-display" style="width: 64px; height: 64px; border-radius: 50%; background: var(--bg-shell); border: 2px solid var(--accent-blue); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 24px; font-weight: 700; color: var(--accent-blue) !important;">
-                                S
-                            </div>
-                            <div style="position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 11px; border: 2px solid var(--bg-surface);">📷</div>
-                            <input type="file" id="avatar-file-picker" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+        <!-- PROFILE TAB -->
+        <div id="profile-view" class="view-screen">
+            <header style="margin-bottom:20px;">
+                <h1 style="font-family:'Syne',sans-serif;font-size:24px;margin:0;">User Profile</h1>
+                <p style="font-size:14px;margin:4px 0 0 0;">Your Medanixx student dashboard</p>
+            </header>
+
+            <div class="profile-card" style="margin-bottom:16px;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div id="avatar-upload-trigger" style="position:relative;cursor:pointer;flex-shrink:0;">
+                        <div id="profile-avatar-display"
+                             style="width:64px;height:64px;border-radius:50%;background:var(--bg-shell);border:2px solid var(--accent-blue);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:24px;font-weight:700;color:var(--accent-blue)!important;">
+                            S
                         </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <h2 id="profile-display-name" style="font-family: 'Syne', sans-serif; font-size: 18px; margin: 0; font-weight: 700;">Student</h2>
-                            <p id="profile-school-name" style="font-size: 12px; margin: 2px 0 8px 0;">Add your school name</p>
-                            <button onclick="toggleEditProfilePanel()" id="edit-profile-toggle-btn" style="background: rgba(59,130,246,0.15); color: var(--accent-blue) !important; border: 1px solid var(--accent-blue); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                                Edit Profile
-                            </button>
-                        </div>
+                        <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--accent-blue);display:flex;align-items:center;justify-content:center;font-size:11px;border:2px solid var(--bg-surface);">📷</div>
+                        <input type="file" id="avatar-file-picker" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
                     </div>
-                </div>
-
-                <!-- 📊 STATS ROW -->
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <div class="profile-card" style="flex: 1; margin-bottom: 0;">
-                        <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Streak</p>
-                        <p style="font-size: 24px; font-weight: 800; font-family: 'Syne', sans-serif; color: var(--text-primary) !important; margin: 0;"><span id="stats-streak-value">0</span> 🔥</p>
-                        <p style="font-size: 11px; margin-top: 4px;">Days in a row</p>
-                    </div>
-                    <div class="profile-card" style="flex: 1; margin-bottom: 0;">
-                        <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Exams Taken</p>
-                        <p style="font-size: 24px; font-weight: 800; font-family: 'Syne', sans-serif; color: var(--text-primary) !important; margin: 0;"><span id="stats-exams-value">0</span> 📝</p>
-                        <p style="font-size: 11px; margin-top: 4px;">Total completed</p>
-                    </div>
-                </div>
-
-                <!-- 📈 MY PROGRESS GRAPH -->
-                <div class="profile-card" style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h3 style="font-size: 15px; margin: 0;">My Progress</h3>
-                        <span style="font-size: 11px;">This Week</span>
-                    </div>
-                    <div id="progress-graph-container" style="width: 100%; overflow: hidden;"></div>
-                    <p id="progress-empty-label" style="display: none; font-size: 12px; text-align: center; padding: 20px 0 4px;">Complete an exam to start tracking your progress 📊</p>
-                </div>
-
-                <!-- ✏️ EDIT PROFILE PANEL (collapsible, includes password change) -->
-                <div id="edit-profile-panel" style="display: none; margin-bottom: 20px;">
-
-                    <div class="profile-card" style="text-align: left; margin-bottom: 16px;">
-                        <h3 style="font-size: 16px; margin-bottom: 12px;">Profile Details</h3>
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Display Username</label>
-                        <input type="text" id="edit-username-input" placeholder="New username..." style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 12px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Email Address</label>
-                        <input type="email" id="edit-email-input" placeholder="New email..." style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 12px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">School Name</label>
-                        <input type="text" id="edit-school-input" placeholder="e.g. University of Nigeria, College of Medicine" style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 14px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <div id="profile-edit-feedback" style="display: none; font-size: 12px; padding: 8px 10px; border-radius: 8px; margin-bottom: 12px;"></div>
-
-                        <button onclick="saveProfileEdits()" style="width: 100%; background: var(--accent-blue); color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px;">
-                            💾 Save Profile Changes
-                        </button>
-                    </div>
-
-                    <!-- 🔒 CHANGE PASSWORD (inside edit panel) -->
-                    <div class="profile-card" style="text-align: left;">
-                        <h3 style="font-size: 16px; margin-bottom: 12px;">Change Password</h3>
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Current Password</label>
-                        <input type="password" id="current-password-input" placeholder="Enter current password..." style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 12px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">New Password</label>
-                        <input type="password" id="new-password-input" placeholder="Enter new password..." style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 12px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Confirm New Password</label>
-                        <input type="password" id="confirm-password-input" placeholder="Re-enter new password..." style="width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 14px; background: var(--bg-shell); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 13px;">
-
-                        <div style="text-align: right; margin-top: -8px; margin-bottom: 12px;">
-                            <span id="toggle-password-fields-visibility" style="font-size: 0.8rem; cursor: pointer; user-select: none; color: var(--accent-blue) !important;">👁️ Show Passwords</span>
-                        </div>
-
-                        <div id="password-change-feedback" style="display: none; font-size: 12px; padding: 8px 10px; border-radius: 8px; margin-bottom: 12px;"></div>
-
-                        <button onclick="changeUserPassword()" style="width: 100%; background: var(--accent-blue); color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px;">
-                            🔑 Update Password
-                        </button>
-                    </div>
-                </div>
-
-                <div style="padding: 1.25rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <button id="app-logout-btn" style="width: 100%; padding: 0.75rem; background: var(--danger); border: none; border-radius: 8px; color: white !important; font-weight: bold; cursor: pointer; margin-bottom: 20px;">
-                        Log Out Account
-                    </button>
-
-                    <div class="profile-card" style="text-align: left; padding: 0;">
-                        <h3 style="font-size: 14px; margin-bottom: 6px;">Developer Key Matrix</h3>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
-                            If responses feel broken or slow down, update your Google Gemini API key here.
-                        </p>
-                        <button onclick="resetApiKey()" style="background-color: var(--accent-blue); color: white; border: none; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%;">
-                            🔄 Update / Reset Gemini API Key
+                    <div style="flex:1;min-width:0;">
+                        <h2 id="profile-display-name" style="font-family:'Syne',sans-serif;font-size:18px;margin:0;font-weight:700;">Student</h2>
+                        <p id="profile-school-name" style="font-size:12px;margin:2px 0 8px 0;">Add your school name</p>
+                        <button onclick="toggleEditProfilePanel()" id="edit-profile-toggle-btn"
+                                style="background:rgba(59,130,246,0.15);color:var(--accent-blue)!important;border:1px solid var(--accent-blue);padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;">
+                            Edit Profile
                         </button>
                     </div>
                 </div>
             </div>
 
-        </main>
+            <div style="display:flex;gap:12px;margin-bottom:20px;">
+                <div class="profile-card" style="flex:1;margin-bottom:0;">
+                    <p style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Streak</p>
+                    <p style="font-size:24px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text-primary)!important;margin:0;"><span id="stats-streak-value">0</span> 🔥</p>
+                    <p style="font-size:11px;margin-top:4px;">Days in a row</p>
+                </div>
+                <div class="profile-card" style="flex:1;margin-bottom:0;">
+                    <p style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Exams Taken</p>
+                    <p style="font-size:24px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text-primary)!important;margin:0;"><span id="stats-exams-value">0</span> 📝</p>
+                    <p style="font-size:11px;margin-top:4px;">Total completed</p>
+                </div>
+            </div>
 
-        <!-- BOTTOM NAV -->
-        <nav id="bottom-nav" class="nav-bar">
-            <button id="nav-home" class="nav-tab-btn active">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                <span>Home</span>
-            </button>
-            <button id="nav-decks" class="nav-tab-btn">
-                <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                <span>Decks</span>
-            </button>
-            <button id="nav-exam" class="nav-tab-btn">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>Exam</span>
-            </button>
-            <button id="nav-chat" class="nav-tab-btn">
-                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>Chat</span>
-            </button>
-            <button id="nav-profile" class="nav-tab-btn">
-                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <span>Profile</span>
-            </button>
-        </nav>
+            <div class="profile-card" style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <h3 style="font-size:15px;margin:0;">My Progress</h3>
+                    <span style="font-size:11px;">This Week</span>
+                </div>
+                <div id="progress-graph-container" style="width:100%;overflow:hidden;"></div>
+                <p id="progress-empty-label" style="display:none;font-size:12px;text-align:center;padding:20px 0 4px;">Complete an exam to start tracking your progress 📊</p>
+            </div>
 
-    </div>
+            <div id="edit-profile-panel" style="display:none;margin-bottom:20px;">
+                <div class="profile-card" style="text-align:left;margin-bottom:16px;">
+                    <h3 style="font-size:16px;margin-bottom:12px;">Profile Details</h3>
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Display Username</label>
+                    <input type="text" id="edit-username-input" placeholder="New username..."
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:12px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Email Address</label>
+                    <input type="email" id="edit-email-input" placeholder="New email..."
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:12px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">School Name</label>
+                    <input type="text" id="edit-school-input" placeholder="e.g. University of Nigeria, College of Medicine"
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:14px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <div id="profile-edit-feedback" style="display:none;font-size:12px;padding:8px 10px;border-radius:8px;margin-bottom:12px;"></div>
+                    <button onclick="saveProfileEdits()"
+                            style="width:100%;background:var(--accent-blue);color:white;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:bold;font-size:13px;">
+                        💾 Save Profile Changes
+                    </button>
+                </div>
 
-    <script>
-        // ── NAV ──────────────────────────────────────────────
-        const buttons = {
-            home: document.getElementById('nav-home'),
-            decks: document.getElementById('nav-decks'),
-            exam: document.getElementById('nav-exam'),
-            profile: document.getElementById('nav-profile'),
-            chat: document.getElementById('nav-chat')
-        };
-        const screens = {
-            home: document.getElementById('home-view'),
-            decks: document.getElementById('decks-view'),
-            exam: document.getElementById('exam-view'),
-            profile: document.getElementById('profile-view'),
-            chat: document.getElementById('chat-view')
-        };
+                <div class="profile-card" style="text-align:left;">
+                    <h3 style="font-size:16px;margin-bottom:12px;">Change Password</h3>
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Current Password</label>
+                    <input type="password" id="current-password-input" placeholder="Enter current password..."
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:12px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">New Password</label>
+                    <input type="password" id="new-password-input" placeholder="Enter new password..."
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:12px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <label style="font-size:12px;font-weight:600;display:block;margin-bottom:6px;">Confirm New Password</label>
+                    <input type="password" id="confirm-password-input" placeholder="Re-enter new password..."
+                           style="width:100%;padding:0.6rem 0.8rem;margin-bottom:14px;background:var(--bg-shell);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:var(--font-body);font-size:13px;">
+                    <div style="text-align:right;margin-top:-8px;margin-bottom:12px;">
+                        <span id="toggle-password-fields-visibility"
+                              style="font-size:0.8rem;cursor:pointer;user-select:none;color:var(--accent-blue)!important;">
+                            👁️ Show Passwords
+                        </span>
+                    </div>
+                    <div id="password-change-feedback" style="display:none;font-size:12px;padding:8px 10px;border-radius:8px;margin-bottom:12px;"></div>
+                    <button onclick="changeUserPassword()"
+                            style="width:100%;background:var(--accent-blue);color:white;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:bold;font-size:13px;">
+                        🔑 Update Password
+                    </button>
+                </div>
+            </div>
 
-        function switchScreen(targetScreen) {
-            Object.keys(screens).forEach(key => {
-                if (screens[key]) screens[key].style.display = 'none';
-                if (buttons[key]) buttons[key].classList.remove('active');
-            });
-            if (screens[targetScreen]) {
-                screens[targetScreen].style.display = (targetScreen === 'chat') ? 'flex' : 'block';
-            }
-            if (buttons[targetScreen]) buttons[targetScreen].classList.add('active');
+            <div style="padding:1.25rem;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                <button id="app-logout-btn"
+                        style="width:100%;padding:0.75rem;background:var(--danger);border:none;border-radius:8px;color:white!important;font-weight:bold;cursor:pointer;">
+                    Log Out Account
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav id="bottom-nav" class="nav-bar">
+        <button id="nav-home" class="nav-tab-btn active">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Home</span>
+        </button>
+        <button id="nav-decks" class="nav-tab-btn">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            <span>Decks</span>
+        </button>
+        <button id="nav-exam" class="nav-tab-btn">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Exam</span>
+        </button>
+        <button id="nav-chat" class="nav-tab-btn">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>Chat</span>
+        </button>
+        <button id="nav-profile" class="nav-tab-btn">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Profile</span>
+        </button>
+    </nav>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// NAV
+// ════════════════════════════════════════════════
+const buttons = {
+    home: document.getElementById('nav-home'),
+    decks: document.getElementById('nav-decks'),
+    exam: document.getElementById('nav-exam'),
+    profile: document.getElementById('nav-profile'),
+    chat: document.getElementById('nav-chat')
+};
+const screens = {
+    home: document.getElementById('home-view'),
+    decks: document.getElementById('decks-view'),
+    exam: document.getElementById('exam-view'),
+    profile: document.getElementById('profile-view'),
+    chat: document.getElementById('chat-view')
+};
+
+function switchScreen(targetScreen) {
+    Object.keys(screens).forEach(key => {
+        if (screens[key]) screens[key].style.display = 'none';
+        if (buttons[key]) buttons[key].classList.remove('active');
+    });
+    if (screens[targetScreen]) {
+        screens[targetScreen].style.display = (targetScreen === 'chat') ? 'flex' : 'block';
+    }
+    if (buttons[targetScreen]) buttons[targetScreen].classList.add('active');
+}
+Object.keys(buttons).forEach(key => {
+    if (buttons[key]) buttons[key].addEventListener('click', () => switchScreen(key));
+});
+
+// ════════════════════════════════════════════════
+// AUTH — with "Keep me signed in" + inline feedback
+// ════════════════════════════════════════════════
+let currentUserEmail = "";
+let currentChosenName = "Student";
+let isSignUpMode = false;
+
+const authScreen      = document.getElementById('auth-screen');
+const authTitle       = document.getElementById('auth-title');
+const authSubtitle    = document.getElementById('auth-subtitle');
+const authPrimaryBtn  = document.getElementById('auth-primary-btn');
+const authToggleLink  = document.getElementById('auth-toggle-link');
+const emailInput      = document.getElementById('auth-email');
+const usernameInput   = document.getElementById('auth-username');
+const passwordInput   = document.getElementById('auth-password');
+const rememberMeBox   = document.getElementById('auth-remember-me');
+const authFeedback    = document.getElementById('auth-feedback');
+
+function showAuthFeedback(msg, type) {
+    authFeedback.className = type; // 'error' or 'success'
+    authFeedback.innerText = msg;
+    authFeedback.style.display = 'block';
+}
+function hideAuthFeedback() {
+    authFeedback.style.display = 'none';
+}
+
+authToggleLink.addEventListener('click', () => {
+    isSignUpMode = !isSignUpMode;
+    emailInput.value = ''; usernameInput.value = ''; passwordInput.value = '';
+    hideAuthFeedback();
+    if (isSignUpMode) {
+        authTitle.innerText = "Create Account";
+        authSubtitle.innerText = "Register your username profile";
+        authPrimaryBtn.innerText = "Register & Enter";
+        authToggleLink.innerText = "Log In";
+        usernameInput.style.display = "block";
+    } else {
+        authTitle.innerText = "Welcome to MEDANIXX";
+        authSubtitle.innerText = "Sign in with your academic email";
+        authPrimaryBtn.innerText = "Log In";
+        authToggleLink.innerText = "Sign Up";
+        usernameInput.style.display = "none";
+    }
+});
+
+authPrimaryBtn.addEventListener('click', handleAuth);
+passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuth(); });
+
+function handleAuth() {
+    hideAuthFeedback();
+    const email    = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    let chosenName = usernameInput.value.trim();
+
+    if (!email || !password) {
+        showAuthFeedback("⚠️ Please fill in all required fields.", "error");
+        return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        showAuthFeedback("⚠️ Please enter a valid email address.", "error");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
+
+    if (isSignUpMode) {
+        if (!chosenName) { showAuthFeedback("⚠️ Please choose a display name.", "error"); return; }
+        if (users[email]) { showAuthFeedback("⚠️ An account already exists with this email.", "error"); return; }
+        if (password.length < 4) { showAuthFeedback("⚠️ Password must be at least 4 characters.", "error"); return; }
+        users[email] = { password, chosenName };
+        localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
+        showAuthFeedback("✅ Account created! Logging you in...", "success");
+        setTimeout(() => completeLogin(email, chosenName), 700);
+    } else {
+        if (!users[email] || users[email].password !== password) {
+            showAuthFeedback("❌ Email or password is incorrect.", "error");
+            return;
         }
+        chosenName = users[email].chosenName || email.split('@')[0];
+        completeLogin(email, chosenName);
+    }
+}
 
-        Object.keys(buttons).forEach(key => {
-            if (buttons[key]) buttons[key].addEventListener('click', () => switchScreen(key));
+function completeLogin(email, name) {
+    currentUserEmail  = email;
+    currentChosenName = name;
+
+    // Persist session based on "Keep me signed in" checkbox
+    const remember = rememberMeBox ? rememberMeBox.checked : true;
+    if (remember) {
+        localStorage.setItem('m2_active_email', email);
+        localStorage.setItem('m2_active_name', name);
+    } else {
+        // Use sessionStorage so it clears when the tab/browser closes
+        sessionStorage.setItem('m2_active_email', email);
+        sessionStorage.setItem('m2_active_name', name);
+        localStorage.removeItem('m2_active_email');
+        localStorage.removeItem('m2_active_name');
+    }
+
+    recordLoginAndUpdateStreak();
+    updateUIIdentity();
+    loadChatHistory(); // restore previous chat messages
+    authScreen.style.display = "none";
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    usernameInput.style.display = "none";
+
+    // Check localStorage first (persistent), then sessionStorage (tab-only)
+    const cachedEmail = localStorage.getItem('m2_active_email') || sessionStorage.getItem('m2_active_email');
+    const cachedName  = localStorage.getItem('m2_active_name')  || sessionStorage.getItem('m2_active_name');
+
+    if (cachedEmail && cachedName) {
+        currentUserEmail  = cachedEmail;
+        currentChosenName = cachedName;
+        recordLoginAndUpdateStreak();
+        updateUIIdentity();
+        loadChatHistory();
+        authScreen.style.display = "none";
+    }
+});
+
+function updateUIIdentity() {
+    const welcomeHeading = document.getElementById('welcome-username-heading');
+    if (welcomeHeading) welcomeHeading.innerText = `Welcome back, ${currentChosenName}`;
+    const chatGreeting = document.getElementById('chat-greeting-bubble');
+    if (chatGreeting) chatGreeting.innerText = `Hey ${currentChosenName}! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯`;
+
+    const displayNameEl = document.getElementById('profile-display-name');
+    if (displayNameEl) displayNameEl.innerText = currentChosenName;
+
+    const editUsernameInput = document.getElementById('edit-username-input');
+    const editEmailInput    = document.getElementById('edit-email-input');
+    const editSchoolInput   = document.getElementById('edit-school-input');
+    if (editUsernameInput) editUsernameInput.value = currentChosenName;
+    if (editEmailInput)    editEmailInput.value    = currentUserEmail;
+    if (editSchoolInput)   editSchoolInput.value   = currentUserEmail ? (localStorage.getItem(`medanixx_school_${currentUserEmail}`) || '') : '';
+
+    renderSchoolName();
+    renderAvatar();
+    renderStreakCard();
+    renderExamStats();
+    renderProgressGraph();
+}
+
+// ════════════════════════════════════════════════
+// SCHOOL NAME
+// ════════════════════════════════════════════════
+function getSchoolKey() { return `medanixx_school_${currentUserEmail}`; }
+function renderSchoolName() {
+    const el = document.getElementById('profile-school-name');
+    if (!el) return;
+    const school = currentUserEmail ? localStorage.getItem(getSchoolKey()) : null;
+    el.innerText = school && school.trim() !== '' ? school : 'Add your school name';
+}
+
+// ════════════════════════════════════════════════
+// AVATAR
+// ════════════════════════════════════════════════
+function getAvatarKey() { return `medanixx_avatar_${currentUserEmail}`; }
+function renderAvatar() {
+    const display = document.getElementById('profile-avatar-display');
+    if (!display) return;
+    const savedAvatar = currentUserEmail ? localStorage.getItem(getAvatarKey()) : null;
+    if (savedAvatar) {
+        display.innerHTML = `<img src="${savedAvatar}" style="width:100%;height:100%;object-fit:cover;" alt="Profile picture">`;
+    } else {
+        display.innerHTML = (currentChosenName || 'S').trim().charAt(0).toUpperCase();
+    }
+}
+function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('⚠️ Please select an image file.'); return; }
+    if (file.size > 2 * 1024 * 1024) { alert('⚠️ Image too large. Please choose one under 2MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try { localStorage.setItem(getAvatarKey(), e.target.result); renderAvatar(); }
+        catch (err) { alert('⚠️ Could not save image. It may be too large for local storage.'); }
+    };
+    reader.readAsDataURL(file);
+}
+const avatarTrigger = document.getElementById('avatar-upload-trigger');
+if (avatarTrigger) avatarTrigger.addEventListener('click', () => document.getElementById('avatar-file-picker').click());
+
+// ════════════════════════════════════════════════
+// EDIT PROFILE PANEL
+// ════════════════════════════════════════════════
+function toggleEditProfilePanel() {
+    const panel = document.getElementById('edit-profile-panel');
+    const btn   = document.getElementById('edit-profile-toggle-btn');
+    if (!panel) return;
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if (btn) btn.innerText = isOpen ? 'Edit Profile' : 'Close Edit Panel';
+}
+
+// ════════════════════════════════════════════════
+// EXAM STATS
+// ════════════════════════════════════════════════
+function getExamCountKey() { return `medanixx_exam_count_${currentUserEmail}`; }
+function incrementExamCount() {
+    if (!currentUserEmail) return;
+    const key = getExamCountKey();
+    let count = parseInt(localStorage.getItem(key) || '0', 10);
+    localStorage.setItem(key, String(count + 1));
+    renderExamStats();
+}
+function renderExamStats() {
+    const el = document.getElementById('stats-exams-value');
+    if (!el) return;
+    el.innerText = currentUserEmail ? parseInt(localStorage.getItem(getExamCountKey()) || '0', 10) : 0;
+}
+
+// ════════════════════════════════════════════════
+// PROGRESS GRAPH
+// ════════════════════════════════════════════════
+function getExamHistoryKey() { return `medanixx_exam_history_${currentUserEmail}`; }
+function recordExamScore(scorePercent) {
+    if (!currentUserEmail) return;
+    const key = getExamHistoryKey();
+    let history = JSON.parse(localStorage.getItem(key)) || [];
+    history.push({ date: getTodayStr(), score: scorePercent });
+    history = history.filter(e => e.date >= getDateStr(30));
+    localStorage.setItem(key, JSON.stringify(history));
+    renderProgressGraph();
+}
+function renderProgressGraph() {
+    const container  = document.getElementById('progress-graph-container');
+    const emptyLabel = document.getElementById('progress-empty-label');
+    if (!container) return;
+    const history = currentUserEmail ? (JSON.parse(localStorage.getItem(getExamHistoryKey())) || []) : [];
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+        const dateStr = getDateStr(i);
+        const entries = history.filter(h => h.date === dateStr);
+        const avg = entries.length > 0 ? Math.round(entries.reduce((a,e) => a + e.score, 0) / entries.length) : null;
+        const d = new Date(); d.setDate(d.getDate() - i);
+        days.push({ label: dayNames[d.getDay()], score: avg });
+    }
+    const hasData = days.some(d => d.score !== null);
+    if (!hasData) {
+        container.style.display = 'none';
+        if (emptyLabel) emptyLabel.style.display = 'block';
+        return;
+    }
+    container.style.display = 'block';
+    if (emptyLabel) emptyLabel.style.display = 'none';
+
+    const width = 300, height = 140, paddingX = 18, paddingTop = 24, paddingBottom = 26;
+    const plotW = width - paddingX * 2, plotH = height - paddingTop - paddingBottom;
+    const stepX = plotW / (days.length - 1);
+    const scoreToY = s => paddingTop + plotH - (Math.max(0,Math.min(100,s)) / 100) * plotH;
+    const points = days.map((d,i) => ({ x: paddingX + i*stepX, y: d.score !== null ? scoreToY(d.score) : null, score: d.score, label: d.label, isToday: i === days.length-1 }));
+
+    let pathSegments = [], currentPath = '';
+    points.forEach(p => {
+        if (p.y === null) { if (currentPath) { pathSegments.push(currentPath); currentPath=''; } return; }
+        currentPath = currentPath === '' ? `M ${p.x} ${p.y}` : currentPath + ` L ${p.x} ${p.y}`;
+    });
+    if (currentPath) pathSegments.push(currentPath);
+
+    let gridLines='', dots='', dayLabels='', valueLabel='';
+    [0,50,100].forEach(val => {
+        const y = scoreToY(val);
+        gridLines += `<line x1="${paddingX}" y1="${y}" x2="${width-paddingX}" y2="${y}" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="3,3"/>`;
+    });
+    points.forEach(p => {
+        dayLabels += `<text x="${p.x}" y="${height-6}" font-size="10" fill="var(--text-secondary)" text-anchor="middle" font-family="DM Sans,sans-serif">${p.label}</text>`;
+        if (p.y !== null) {
+            dots += `<circle cx="${p.x}" cy="${p.y}" r="${p.isToday?5:3.5}" fill="var(--accent-blue)" stroke="var(--bg-surface)" stroke-width="2"/>`;
+            if (p.isToday) valueLabel = `<g><rect x="${p.x-22}" y="${p.y-28}" width="44" height="20" rx="6" fill="var(--accent-blue)"/><text x="${p.x}" y="${p.y-14}" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="DM Sans,sans-serif">${p.score}%</text></g>`;
+        }
+    });
+    const pathLines = pathSegments.map(seg => `<path d="${seg}" fill="none" stroke="var(--accent-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+    container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block;">${gridLines}${pathLines}${dots}${valueLabel}${dayLabels}</svg>`;
+}
+
+// ════════════════════════════════════════════════
+// EDIT PROFILE SAVE
+// ════════════════════════════════════════════════
+function showProfileFeedback(elementId, message, type) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.style.display = 'block';
+    el.innerText = message;
+    el.style.background = type==='success' ? 'rgba(16,185,129,0.12)' : 'rgba(240,81,106,0.12)';
+    el.style.setProperty('color', type==='success' ? 'var(--success)' : 'var(--danger)', 'important');
+    el.style.border = `1px solid var(--${type==='success'?'success':'danger'})`;
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function saveProfileEdits() {
+    if (!currentUserEmail) return;
+    const newUsername = document.getElementById('edit-username-input').value.trim();
+    const newEmail    = document.getElementById('edit-email-input').value.trim();
+    const newSchool   = document.getElementById('edit-school-input').value.trim();
+    if (!newUsername || !newEmail) { showProfileFeedback('profile-edit-feedback','⚠️ Username and email cannot be empty.','error'); return; }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(newEmail)) { showProfileFeedback('profile-edit-feedback','⚠️ Please enter a valid email address.','error'); return; }
+    let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
+    const oldEmail = currentUserEmail;
+    const userRecord = users[oldEmail];
+    if (!userRecord) { showProfileFeedback('profile-edit-feedback','⚠️ Could not locate your account record.','error'); return; }
+    if (newEmail !== oldEmail && users[newEmail]) { showProfileFeedback('profile-edit-feedback','⚠️ That email is already in use.','error'); return; }
+    userRecord.chosenName = newUsername;
+    if (newEmail !== oldEmail) {
+        delete users[oldEmail];
+        users[newEmail] = userRecord;
+        ['streak','avatar','exam_count','exam_history','school'].forEach(suffix => {
+            const oldKey = `medanixx_${suffix}_${oldEmail}`;
+            const newKey = `medanixx_${suffix}_${newEmail}`;
+            const val = localStorage.getItem(oldKey);
+            if (val) { localStorage.setItem(newKey, val); localStorage.removeItem(oldKey); }
         });
+        currentUserEmail = newEmail;
+        localStorage.setItem('m2_active_email', newEmail);
+    } else {
+        users[oldEmail] = userRecord;
+    }
+    localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
+    if (newSchool !== '') localStorage.setItem(getSchoolKey(), newSchool);
+    else localStorage.removeItem(getSchoolKey());
+    currentChosenName = newUsername;
+    localStorage.setItem('m2_active_name', newUsername);
+    updateUIIdentity();
+    showProfileFeedback('profile-edit-feedback','✅ Profile updated successfully!','success');
+}
 
-        // ── AUTH ─────────────────────────────────────────────
-        let currentUserEmail = "";
-        let currentChosenName = "Student";
-        let isSignUpMode = false;
+function changeUserPassword() {
+    if (!currentUserEmail) return;
+    const currentPwd = document.getElementById('current-password-input').value.trim();
+    const newPwd     = document.getElementById('new-password-input').value.trim();
+    const confirmPwd = document.getElementById('confirm-password-input').value.trim();
+    if (!currentPwd||!newPwd||!confirmPwd) { showProfileFeedback('password-change-feedback','⚠️ Please fill in all password fields.','error'); return; }
+    let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
+    const userRecord = users[currentUserEmail];
+    if (!userRecord) { showProfileFeedback('password-change-feedback','⚠️ Could not locate your account record.','error'); return; }
+    if (userRecord.password !== currentPwd) { showProfileFeedback('password-change-feedback','❌ Current password is incorrect.','error'); return; }
+    if (newPwd.length < 4) { showProfileFeedback('password-change-feedback','⚠️ New password must be at least 4 characters.','error'); return; }
+    if (newPwd !== confirmPwd) { showProfileFeedback('password-change-feedback','⚠️ New passwords do not match.','error'); return; }
+    if (newPwd === currentPwd) { showProfileFeedback('password-change-feedback','⚠️ New password must differ from current.','error'); return; }
+    userRecord.password = newPwd;
+    users[currentUserEmail] = userRecord;
+    localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
+    ['current-password-input','new-password-input','confirm-password-input'].forEach(id => { document.getElementById(id).value = ''; });
+    showProfileFeedback('password-change-feedback','✅ Password updated successfully!','success');
+}
 
-        const authScreen = document.getElementById('auth-screen');
-        const authTitle = document.getElementById('auth-title');
-        const authSubtitle = document.getElementById('auth-subtitle');
-        const authPrimaryBtn = document.getElementById('auth-primary-btn');
-        const authToggleLink = document.getElementById('auth-toggle-link');
-        const emailInput = document.getElementById('auth-email');
-        const usernameInput = document.getElementById('auth-username');
-        const passwordInput = document.getElementById('auth-password');
+// ════════════════════════════════════════════════
+// STREAK SYSTEM
+// ════════════════════════════════════════════════
+function getStreakKey() { return `medanixx_streak_${currentUserEmail}`; }
+function getTodayStr() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function getDateStr(daysAgo) { const d=new Date(); d.setDate(d.getDate()-daysAgo); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
-        authToggleLink.addEventListener('click', () => {
-            isSignUpMode = !isSignUpMode;
-            emailInput.value = ''; usernameInput.value = ''; passwordInput.value = '';
-            if (isSignUpMode) {
-                authTitle.innerText = "Create Account";
-                authSubtitle.innerText = "Register your custom username profile";
-                authPrimaryBtn.innerText = "Register & Enter";
-                authToggleLink.innerText = "Log In";
-                usernameInput.style.display = "block";
-            } else {
-                authTitle.innerText = "Welcome to MEDANIXX";
-                authSubtitle.innerText = "Sign in via academic email portal";
-                authPrimaryBtn.innerText = "Log In";
-                authToggleLink.innerText = "Sign Up";
-                usernameInput.style.display = "none";
-            }
+function recordLoginAndUpdateStreak() {
+    if (!currentUserEmail) return;
+    const key=getStreakKey(), today=getTodayStr(), yesterday=getDateStr(1);
+    let data = JSON.parse(localStorage.getItem(key)) || { streak:0, lastLoginDate:null, history:[] };
+    if (data.lastLoginDate===today) return;
+    data.streak = data.lastLoginDate===yesterday ? data.streak+1 : (data.lastLoginDate===null ? 1 : 1);
+    data.lastLoginDate = today;
+    if (!data.history.includes(today)) { data.history.push(today); data.history=data.history.slice(-30); }
+    localStorage.setItem(key, JSON.stringify(data));
+}
+function getStreakData() {
+    if (!currentUserEmail) return { streak:0, lastLoginDate:null, history:[] };
+    return JSON.parse(localStorage.getItem(getStreakKey())) || { streak:0, lastLoginDate:null, history:[] };
+}
+function renderStreakCard() {
+    const data=getStreakData(), streak=data.streak, history=data.history||[], today=getTodayStr();
+    const countEl=document.getElementById('user-streak-count'); if(countEl) countEl.innerText=streak;
+    const unitEl=document.getElementById('streak-unit'); if(unitEl) unitEl.innerText=streak===1?' Day 🔥':' Days 🔥';
+    const statusEl=document.getElementById('streak-status-label');
+    if(statusEl) statusEl.innerText = streak===0 ? "Log in daily to start your streak!" : (data.lastLoginDate===today ? "You've checked in today. Come back tomorrow!" : "⚠️ Log in today to keep your streak alive!");
+    const statsStreak=document.getElementById('stats-streak-value'); if(statsStreak) statsStreak.innerText=streak;
+    const badgeEl=document.getElementById('streak-badge'), badgeIcon=document.getElementById('streak-badge-icon'), badgeLabel=document.getElementById('streak-badge-label');
+    if(badgeEl) {
+        let badge=null;
+        if(streak>=30) badge={icon:'🏆',label:'30 DAY'}; else if(streak>=14) badge={icon:'🥇',label:'14 DAY'}; else if(streak>=7) badge={icon:'🥈',label:'7 DAY'}; else if(streak>=3) badge={icon:'🥉',label:'3 DAY'};
+        badgeEl.style.display=badge?'flex':'none';
+        if(badge) { badgeIcon.innerText=badge.icon; badgeLabel.innerText=badge.label; }
+    }
+    const trail=document.getElementById('streak-dot-trail');
+    if(trail) {
+        trail.innerHTML='';
+        const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        for(let i=6;i>=0;i--) {
+            const dateStr=getDateStr(i), wasActive=history.includes(dateStr), isToday=(i===0);
+            const d=new Date(); d.setDate(d.getDate()-i);
+            const wrapper=document.createElement('div'); wrapper.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;';
+            const dot=document.createElement('div'); dot.className=`streak-dot ${wasActive?(isToday?'today-active':'active'):'inactive'}`;
+            dot.innerText=wasActive?(isToday?'🔥':'✓'):''; if(!wasActive) dot.style.opacity='0.5';
+            const lbl=document.createElement('div'); lbl.className='streak-dot-label'; lbl.innerText=isToday?'Today':dayNames[d.getDay()];
+            wrapper.appendChild(dot); wrapper.appendChild(lbl); trail.appendChild(wrapper);
+        }
+    }
+}
+
+// ════════════════════════════════════════════════
+// CHAT — with typing indicator, progress bar, retry
+// ════════════════════════════════════════════════
+const PROXY_URL = "http://127.0.0.1:5000/api/chat";
+
+const chatHistoryContainer = document.getElementById('chat-history-container');
+const chatInputField       = document.getElementById('chat-input-field');
+const chatSendBtn          = document.getElementById('chat-send-btn');
+const chatProgressWrap     = document.getElementById('chat-progress-wrap');
+const chatProgressBar      = document.getElementById('chat-progress-bar');
+
+let isChatLoading = false;
+let progressTimer  = null;
+
+// Persist chat to localStorage
+function getChatKey() { return `mdx_chat_history_${currentUserEmail}`; }
+function saveMsgToStorage(sender, text) {
+    let history = JSON.parse(localStorage.getItem(getChatKey())) || [];
+    history.push({ sender, text });
+    try { localStorage.setItem(getChatKey(), JSON.stringify(history)); } catch(e) { /* storage full */ }
+}
+function loadChatHistory() {
+    if (!chatHistoryContainer || !currentUserEmail) return;
+    // Remove all messages except the greeting bubble
+    const greeting = document.getElementById('chat-greeting-bubble');
+    chatHistoryContainer.innerHTML = '';
+    if (greeting) {
+        const greetDiv = document.createElement('div');
+        greetDiv.className = 'msg msg-ai';
+        greetDiv.appendChild(greeting);
+        chatHistoryContainer.appendChild(greetDiv);
+    }
+    const history = JSON.parse(localStorage.getItem(getChatKey())) || [];
+    history.forEach(item => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = item.sender === 'user' ? 'msg msg-user' : 'msg msg-ai';
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.style.color = item.sender === 'user' ? '#ffffff' : 'var(--text-primary)';
+        bubble.innerText = item.text;
+        msgDiv.appendChild(bubble);
+        chatHistoryContainer.appendChild(msgDiv);
+    });
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+}
+
+// Animated progress bar while waiting
+function startProgressBar() {
+    chatProgressWrap.classList.add('active');
+    chatProgressBar.style.width = '0%';
+    let pct = 0;
+    progressTimer = setInterval(() => {
+        pct = pct < 85 ? pct + (Math.random() * 4) : pct + 0.3;
+        if (pct > 92) pct = 92;
+        chatProgressBar.style.width = pct + '%';
+    }, 200);
+}
+function finishProgressBar() {
+    clearInterval(progressTimer);
+    chatProgressBar.style.width = '100%';
+    setTimeout(() => {
+        chatProgressWrap.classList.remove('active');
+        chatProgressBar.style.width = '0%';
+    }, 350);
+}
+
+// Render a typing indicator bubble while waiting for AI
+function appendTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'msg msg-ai';
+    div.id = 'typing-indicator-msg';
+    div.innerHTML = `<div class="msg-bubble" style="background:var(--bg-surface)!important;border:1px solid var(--border-color);border-radius:16px 16px 16px 4px;padding:12px 16px;">
+        <div class="typing-indicator"><span></span><span></span><span></span></div>
+    </div>`;
+    chatHistoryContainer.appendChild(div);
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+}
+function removeTypingIndicator() {
+    const el = document.getElementById('typing-indicator-msg');
+    if (el) el.remove();
+}
+
+// Render a failed AI bubble with a Retry button
+function appendErrorBubble(lastUserText) {
+    const div = document.createElement('div');
+    div.className = 'msg msg-ai';
+    div.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-start;">
+        <div class="msg-bubble" style="background:var(--bg-surface)!important;border:1px solid var(--border-color);border-radius:16px 16px 16px 4px;color:var(--danger)!important;">
+            ⚠️ Medanixx AI is temporarily unavailable.
+        </div>
+        <button class="msg-retry-btn" onclick="retryLastMessage(this, ${JSON.stringify(lastUserText)})">
+            🔄 Retry
+        </button>
+    </div>`;
+    chatHistoryContainer.appendChild(div);
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+}
+
+async function sendMessage(text) {
+    if (isChatLoading || !text.trim()) return;
+    isChatLoading = true;
+    chatSendBtn.disabled = true;
+
+    // Render user bubble
+    const userDiv = document.createElement('div');
+    userDiv.className = 'msg msg-user';
+    userDiv.innerHTML = `<div class="msg-bubble" style="color:#fff!important;">${text}</div>`;
+    chatHistoryContainer.appendChild(userDiv);
+    saveMsgToStorage('user', text);
+    chatInputField.value = '';
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+
+    // Show typing + progress
+    appendTypingIndicator();
+    startProgressBar();
+
+    try {
+        const response = await fetch(PROXY_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text, subject: "General" })
         });
-
-        authPrimaryBtn.addEventListener('click', () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            let chosenName = usernameInput.value.trim();
-            if (!email || !password) { alert("Please fill in all fields!"); return; }
-
-            let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
-
-            if (isSignUpMode) {
-                if (!chosenName) { alert("Please choose a display name!"); return; }
-                if (users[email]) { alert("Account already exists!"); return; }
-                users[email] = { password, chosenName };
-                localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
-            } else {
-                if (!users[email] || users[email].password !== password) { alert("Invalid credentials! ❌"); return; }
-                chosenName = users[email].chosenName || email.split('@')[0];
-            }
-
-            currentUserEmail = email;
-            currentChosenName = chosenName;
-            localStorage.setItem('m2_active_email', email);
-            localStorage.setItem('m2_active_name', chosenName);
-
-            recordLoginAndUpdateStreak();
-            updateUIIdentity();
-            authScreen.style.display = "none";
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            usernameInput.style.display = "none";
-            const cachedEmail = localStorage.getItem('m2_active_email');
-            const cachedName = localStorage.getItem('m2_active_name');
-            if (cachedEmail && cachedName) {
-                currentUserEmail = cachedEmail;
-                currentChosenName = cachedName;
-                recordLoginAndUpdateStreak();
-                updateUIIdentity();
-                authScreen.style.display = "none";
-            }
-        });
-
-        function updateUIIdentity() {
-            const welcomeHeading = document.getElementById('welcome-username-heading');
-            if (welcomeHeading) welcomeHeading.innerText = `Welcome back, ${currentChosenName}`;
-            const chatGreeting = document.getElementById('chat-greeting-bubble');
-            if (chatGreeting) chatGreeting.innerText = `Hey ${currentChosenName}! I've fully indexed your 9 courses. Which concept or exam topic should we break down first? 🎯`;
-
-            // Profile header
-            const displayNameEl = document.getElementById('profile-display-name');
-            if (displayNameEl) displayNameEl.innerText = currentChosenName;
-
-            // Pre-fill edit profile fields
-            const editUsernameInput = document.getElementById('edit-username-input');
-            const editEmailInput = document.getElementById('edit-email-input');
-            const editSchoolInput = document.getElementById('edit-school-input');
-            if (editUsernameInput) editUsernameInput.value = currentChosenName;
-            if (editEmailInput) editEmailInput.value = currentUserEmail;
-            if (editSchoolInput) editSchoolInput.value = currentUserEmail ? (localStorage.getItem(`medanixx_school_${currentUserEmail}`) || '') : '';
-
-            renderSchoolName();
-            renderAvatar();
-            renderStreakCard();
-            renderExamStats();
-            renderProgressGraph();
-        }
-
-        // ── 🏫 SCHOOL NAME ────────────────────────────────────
-        function getSchoolKey() {
-            return `medanixx_school_${currentUserEmail}`;
-        }
-
-        function renderSchoolName() {
-            const el = document.getElementById('profile-school-name');
-            if (!el) return;
-            const school = currentUserEmail ? localStorage.getItem(getSchoolKey()) : null;
-            el.innerText = school && school.trim() !== '' ? school : 'Add your school name';
-        }
-
-        // ── 📷 PROFILE AVATAR ─────────────────────────────────
-        function getAvatarKey() {
-            return `medanixx_avatar_${currentUserEmail}`;
-        }
-
-        function renderAvatar() {
-            const display = document.getElementById('profile-avatar-display');
-            if (!display) return;
-            const savedAvatar = currentUserEmail ? localStorage.getItem(getAvatarKey()) : null;
-            if (savedAvatar) {
-                display.innerHTML = `<img src="${savedAvatar}" style="width: 100%; height: 100%; object-fit: cover;" alt="Profile picture">`;
-            } else {
-                const initial = (currentChosenName || 'S').trim().charAt(0).toUpperCase();
-                display.innerHTML = initial;
-            }
-        }
-
-        function handleAvatarUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) {
-                alert('⚠️ Please select an image file.');
-                return;
-            }
-            if (file.size > 2 * 1024 * 1024) {
-                alert('⚠️ Image too large. Please choose an image under 2MB.');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    localStorage.setItem(getAvatarKey(), e.target.result);
-                    renderAvatar();
-                } catch (err) {
-                    alert('⚠️ Could not save image. It may be too large for local storage.');
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        const avatarTrigger = document.getElementById('avatar-upload-trigger');
-        if (avatarTrigger) {
-            avatarTrigger.addEventListener('click', () => {
-                document.getElementById('avatar-file-picker').click();
-            });
-        }
-
-        // ── ✏️ EDIT PROFILE PANEL TOGGLE ─────────────────────
-        function toggleEditProfilePanel() {
-            const panel = document.getElementById('edit-profile-panel');
-            const btn = document.getElementById('edit-profile-toggle-btn');
-            if (!panel) return;
-            const isOpen = panel.style.display === 'block';
-            panel.style.display = isOpen ? 'none' : 'block';
-            if (btn) btn.innerText = isOpen ? 'Edit Profile' : 'Close Edit Panel';
-        }
-
-        // ── 📝 EXAM STATS TRACKING ───────────────────────────
-        function getExamCountKey() {
-            return `medanixx_exam_count_${currentUserEmail}`;
-        }
-
-        function incrementExamCount() {
-            if (!currentUserEmail) return;
-            const key = getExamCountKey();
-            let count = parseInt(localStorage.getItem(key) || '0', 10);
-            count += 1;
-            localStorage.setItem(key, String(count));
-            renderExamStats();
-        }
-
-        function renderExamStats() {
-            const examStatEl = document.getElementById('stats-exams-value');
-            if (!examStatEl) return;
-            const count = currentUserEmail ? parseInt(localStorage.getItem(getExamCountKey()) || '0', 10) : 0;
-            examStatEl.innerText = count;
-        }
-
-        // ── 📈 PROGRESS GRAPH (exam scores over last 7 days) ──
-        function getExamHistoryKey() {
-            return `medanixx_exam_history_${currentUserEmail}`;
-        }
-
-        function recordExamScore(scorePercent) {
-            if (!currentUserEmail) return;
-            const key = getExamHistoryKey();
-            let history = JSON.parse(localStorage.getItem(key)) || [];
-            history.push({ date: getTodayStr(), score: scorePercent });
-            // Keep entries from the last 30 days only, to avoid unbounded growth
-            const cutoff = getDateStr(30);
-            history = history.filter(entry => entry.date >= cutoff);
-            localStorage.setItem(key, JSON.stringify(history));
-            renderProgressGraph();
-        }
-
-        function renderProgressGraph() {
-            const container = document.getElementById('progress-graph-container');
-            const emptyLabel = document.getElementById('progress-empty-label');
-            if (!container) return;
-
-            const history = currentUserEmail ? (JSON.parse(localStorage.getItem(getExamHistoryKey())) || []) : [];
-
-            // Build last 7 days, computing average score per day
-            const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-            const days = [];
-            for (let i = 6; i >= 0; i--) {
-                const dateStr = getDateStr(i);
-                const entries = history.filter(h => h.date === dateStr);
-                let avg = null;
-                if (entries.length > 0) {
-                    const sum = entries.reduce((acc, e) => acc + e.score, 0);
-                    avg = Math.round(sum / entries.length);
-                }
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                days.push({ label: dayNames[d.getDay()], score: avg });
-            }
-
-            const hasData = days.some(d => d.score !== null);
-            if (!hasData) {
-                container.style.display = 'none';
-                if (emptyLabel) emptyLabel.style.display = 'block';
-                return;
-            }
-            container.style.display = 'block';
-            if (emptyLabel) emptyLabel.style.display = 'none';
-
-            // SVG dimensions
-            const width = 300;
-            const height = 140;
-            const paddingX = 18;
-            const paddingTop = 24;
-            const paddingBottom = 26;
-            const plotW = width - paddingX * 2;
-            const plotH = height - paddingTop - paddingBottom;
-
-            const stepX = plotW / (days.length - 1);
-
-            // Map score (0-100) to y coordinate
-            function scoreToY(score) {
-                const clamped = Math.max(0, Math.min(100, score));
-                return paddingTop + plotH - (clamped / 100) * plotH;
-            }
-
-            // Build points only for days with data, connecting consecutive known points
-            const points = days.map((d, i) => ({
-                x: paddingX + i * stepX,
-                y: d.score !== null ? scoreToY(d.score) : null,
-                score: d.score,
-                label: d.label,
-                isToday: i === days.length - 1
-            }));
-
-            // Build path for connected segments (skip gaps where score is null)
-            let pathSegments = [];
-            let currentPath = '';
-            points.forEach((p) => {
-                if (p.y === null) {
-                    if (currentPath) { pathSegments.push(currentPath); currentPath = ''; }
-                    return;
-                }
-                if (currentPath === '') {
-                    currentPath = `M ${p.x} ${p.y}`;
-                } else {
-                    currentPath += ` L ${p.x} ${p.y}`;
-                }
-            });
-            if (currentPath) pathSegments.push(currentPath);
-
-            // Grid lines (horizontal, at 0/50/100)
-            let gridLines = '';
-            [0, 50, 100].forEach(val => {
-                const y = scoreToY(val);
-                gridLines += `<line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="3,3" />`;
-            });
-
-            // Data point dots + labels
-            let dots = '';
-            let dayLabels = '';
-            let valueLabel = '';
-            points.forEach((p) => {
-                dayLabels += `<text x="${p.x}" y="${height - 6}" font-size="10" fill="var(--text-secondary)" text-anchor="middle" font-family="DM Sans, sans-serif">${p.label}</text>`;
-                if (p.y !== null) {
-                    const dotColor = p.isToday ? 'var(--accent-blue)' : 'var(--accent-blue)';
-                    const radius = p.isToday ? 5 : 3.5;
-                    dots += `<circle cx="${p.x}" cy="${p.y}" r="${radius}" fill="${dotColor}" stroke="var(--bg-surface)" stroke-width="2" />`;
-                    if (p.isToday) {
-                        valueLabel = `<g>
-                            <rect x="${p.x - 22}" y="${p.y - 28}" width="44" height="20" rx="6" fill="var(--accent-blue)" />
-                            <text x="${p.x}" y="${p.y - 14}" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="DM Sans, sans-serif">${p.score}%</text>
-                        </g>`;
-                    }
-                }
-            });
-
-            const pathLines = pathSegments.map(seg =>
-                `<path d="${seg}" fill="none" stroke="var(--accent-blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`
-            ).join('');
-
-            const svg = `<svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: auto; display: block;">
-                ${gridLines}
-                ${pathLines}
-                ${dots}
-                ${valueLabel}
-                ${dayLabels}
-            </svg>`;
-
-            container.innerHTML = svg;
-        }
-
-        // ── ✏️ EDIT PROFILE (username + email) ──────────────
-        function showProfileFeedback(elementId, message, type) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            el.style.display = 'block';
-            el.innerText = message;
-            if (type === 'success') {
-                el.style.background = 'rgba(16, 185, 129, 0.12)';
-                el.style.color = 'var(--success)';
-                el.style.border = '1px solid var(--success)';
-            } else {
-                el.style.background = 'rgba(240, 81, 106, 0.12)';
-                el.style.color = 'var(--danger)';
-                el.style.border = '1px solid var(--danger)';
-            }
-            el.style.setProperty('color', type === 'success' ? 'var(--success)' : 'var(--danger)', 'important');
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
-        }
-
-        function saveProfileEdits() {
-            if (!currentUserEmail) return;
-
-            const newUsername = document.getElementById('edit-username-input').value.trim();
-            const newEmail = document.getElementById('edit-email-input').value.trim();
-            const newSchool = document.getElementById('edit-school-input').value.trim();
-
-            if (!newUsername || !newEmail) {
-                showProfileFeedback('profile-edit-feedback', '⚠️ Username and email cannot be empty.', 'error');
-                return;
-            }
-
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(newEmail)) {
-                showProfileFeedback('profile-edit-feedback', '⚠️ Please enter a valid email address.', 'error');
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
-            const oldEmail = currentUserEmail;
-            const userRecord = users[oldEmail];
-
-            if (!userRecord) {
-                showProfileFeedback('profile-edit-feedback', '⚠️ Could not locate your account record.', 'error');
-                return;
-            }
-
-            // If email is changing, ensure the new email isn't already taken by another account
-            if (newEmail !== oldEmail && users[newEmail]) {
-                showProfileFeedback('profile-edit-feedback', '⚠️ That email is already in use by another account.', 'error');
-                return;
-            }
-
-            // Update username
-            userRecord.chosenName = newUsername;
-
-            if (newEmail !== oldEmail) {
-                // Re-key the user record under the new email
-                delete users[oldEmail];
-                users[newEmail] = userRecord;
-
-                // Migrate streak data to the new email key
-                const oldStreakKey = `medanixx_streak_${oldEmail}`;
-                const newStreakKey = `medanixx_streak_${newEmail}`;
-                const streakData = localStorage.getItem(oldStreakKey);
-                if (streakData) {
-                    localStorage.setItem(newStreakKey, streakData);
-                    localStorage.removeItem(oldStreakKey);
-                }
-
-                // Migrate avatar to the new email key
-                const oldAvatarKey = `medanixx_avatar_${oldEmail}`;
-                const newAvatarKey = `medanixx_avatar_${newEmail}`;
-                const avatarData = localStorage.getItem(oldAvatarKey);
-                if (avatarData) {
-                    localStorage.setItem(newAvatarKey, avatarData);
-                    localStorage.removeItem(oldAvatarKey);
-                }
-
-                // Migrate exam count to the new email key
-                const oldExamKey = `medanixx_exam_count_${oldEmail}`;
-                const newExamKey = `medanixx_exam_count_${newEmail}`;
-                const examCountData = localStorage.getItem(oldExamKey);
-                if (examCountData) {
-                    localStorage.setItem(newExamKey, examCountData);
-                    localStorage.removeItem(oldExamKey);
-                }
-
-                // Migrate exam score history to the new email key
-                const oldHistoryKey = `medanixx_exam_history_${oldEmail}`;
-                const newHistoryKey = `medanixx_exam_history_${newEmail}`;
-                const historyData = localStorage.getItem(oldHistoryKey);
-                if (historyData) {
-                    localStorage.setItem(newHistoryKey, historyData);
-                    localStorage.removeItem(oldHistoryKey);
-                }
-
-                // Migrate school name to the new email key
-                const oldSchoolKey = `medanixx_school_${oldEmail}`;
-                const newSchoolKey = `medanixx_school_${newEmail}`;
-                const schoolData = localStorage.getItem(oldSchoolKey);
-                if (schoolData) {
-                    localStorage.setItem(newSchoolKey, schoolData);
-                    localStorage.removeItem(oldSchoolKey);
-                }
-
-                currentUserEmail = newEmail;
-                localStorage.setItem('m2_active_email', newEmail);
-            } else {
-                users[oldEmail] = userRecord;
-            }
-
-            localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
-
-            // Save school name under (possibly updated) currentUserEmail
-            if (newSchool !== '') {
-                localStorage.setItem(getSchoolKey(), newSchool);
-            } else {
-                localStorage.removeItem(getSchoolKey());
-            }
-
-            currentChosenName = newUsername;
-            localStorage.setItem('m2_active_name', newUsername);
-
-            updateUIIdentity();
-            showProfileFeedback('profile-edit-feedback', '✅ Profile updated successfully!', 'success');
-        }
-
-        // ── 🔒 CHANGE PASSWORD ───────────────────────────────
-        function changeUserPassword() {
-            if (!currentUserEmail) return;
-
-            const currentPwd = document.getElementById('current-password-input').value.trim();
-            const newPwd = document.getElementById('new-password-input').value.trim();
-            const confirmPwd = document.getElementById('confirm-password-input').value.trim();
-
-            if (!currentPwd || !newPwd || !confirmPwd) {
-                showProfileFeedback('password-change-feedback', '⚠️ Please fill in all password fields.', 'error');
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem('medanixx_users_v2')) || {};
-            const userRecord = users[currentUserEmail];
-
-            if (!userRecord) {
-                showProfileFeedback('password-change-feedback', '⚠️ Could not locate your account record.', 'error');
-                return;
-            }
-
-            if (userRecord.password !== currentPwd) {
-                showProfileFeedback('password-change-feedback', '❌ Current password is incorrect.', 'error');
-                return;
-            }
-
-            if (newPwd.length < 4) {
-                showProfileFeedback('password-change-feedback', '⚠️ New password must be at least 4 characters.', 'error');
-                return;
-            }
-
-            if (newPwd !== confirmPwd) {
-                showProfileFeedback('password-change-feedback', '⚠️ New passwords do not match.', 'error');
-                return;
-            }
-
-            if (newPwd === currentPwd) {
-                showProfileFeedback('password-change-feedback', '⚠️ New password must be different from the current one.', 'error');
-                return;
-            }
-
-            userRecord.password = newPwd;
-            users[currentUserEmail] = userRecord;
-            localStorage.setItem('medanixx_users_v2', JSON.stringify(users));
-
-            // Clear password fields
-            document.getElementById('current-password-input').value = '';
-            document.getElementById('new-password-input').value = '';
-            document.getElementById('confirm-password-input').value = '';
-
-            showProfileFeedback('password-change-feedback', '✅ Password updated successfully!', 'success');
-        }
-
-        // ── ★ REAL STREAK SYSTEM ★ ──────────────────────────
-        /**
-         * Streak data stored in localStorage as JSON:
-         * {
-         *   streak: number,          // current streak count
-         *   lastLoginDate: "YYYY-MM-DD",
-         *   history: ["YYYY-MM-DD", ...] // last 30 days of login dates (unique)
-         * }
-         */
-        function getStreakKey() {
-            return `medanixx_streak_${currentUserEmail}`;
-        }
-
-        function getTodayStr() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        }
-
-        function getDateStr(daysAgo) {
-            const d = new Date();
-            d.setDate(d.getDate() - daysAgo);
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        }
-
-        function recordLoginAndUpdateStreak() {
-            if (!currentUserEmail) return;
-            const key = getStreakKey();
-            const today = getTodayStr();
-            const yesterday = getDateStr(1);
-
-            let data = JSON.parse(localStorage.getItem(key)) || { streak: 0, lastLoginDate: null, history: [] };
-
-            if (data.lastLoginDate === today) {
-                // Already logged in today — no change needed
-                return;
-            }
-
-            if (data.lastLoginDate === yesterday) {
-                // Consecutive day — increment streak
-                data.streak += 1;
-            } else if (data.lastLoginDate === null) {
-                // First ever login
-                data.streak = 1;
-            } else {
-                // Missed at least one day — reset
-                data.streak = 1;
-            }
-
-            data.lastLoginDate = today;
-
-            // Store today in history (unique sorted)
-            if (!data.history.includes(today)) {
-                data.history.push(today);
-                // Keep last 30 days only
-                data.history = data.history.slice(-30);
-            }
-
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        function getStreakData() {
-            if (!currentUserEmail) return { streak: 0, lastLoginDate: null, history: [] };
-            const key = getStreakKey();
-            return JSON.parse(localStorage.getItem(key)) || { streak: 0, lastLoginDate: null, history: [] };
-        }
-
-        function renderStreakCard() {
-            const data = getStreakData();
-            const streak = data.streak;
-            const history = data.history || [];
-            const today = getTodayStr();
-
-            // Update count
-            const countEl = document.getElementById('user-streak-count');
-            const unitEl = document.getElementById('streak-unit');
-            if (countEl) countEl.innerText = streak;
-            if (unitEl) unitEl.innerText = streak === 1 ? ' Day 🔥' : ' Days 🔥';
-
-            // Status label
-            const statusEl = document.getElementById('streak-status-label');
-            if (statusEl) {
-                if (streak === 0) {
-                    statusEl.innerText = "Log in daily to start your streak!";
-                } else if (data.lastLoginDate === today) {
-                    statusEl.innerText = "You've checked in today. Come back tomorrow!";
-                } else {
-                    statusEl.innerText = "⚠️ Log in today to keep your streak alive!";
-                }
-            }
-
-            // Stats card streak value
-            const statsStreak = document.getElementById('stats-streak-value');
-            if (statsStreak) statsStreak.innerText = streak;
-
-            // Badge logic
-            const badgeEl = document.getElementById('streak-badge');
-            const badgeIcon = document.getElementById('streak-badge-icon');
-            const badgeLabel = document.getElementById('streak-badge-label');
-            if (badgeEl) {
-                let badge = null;
-                if (streak >= 30) badge = { icon: '🏆', label: '30 DAY' };
-                else if (streak >= 14) badge = { icon: '🥇', label: '14 DAY' };
-                else if (streak >= 7)  badge = { icon: '🥈', label: '7 DAY' };
-                else if (streak >= 3)  badge = { icon: '🥉', label: '3 DAY' };
-
-                if (badge) {
-                    badgeEl.style.display = 'flex';
-                    badgeIcon.innerText = badge.icon;
-                    badgeLabel.innerText = badge.label;
-                } else {
-                    badgeEl.style.display = 'none';
-                }
-            }
-
-            // 7-day dot trail
-            const trail = document.getElementById('streak-dot-trail');
-            if (trail) {
-                trail.innerHTML = '';
-                const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                for (let i = 6; i >= 0; i--) {
-                    const dateStr = getDateStr(i);
-                    const wasActive = history.includes(dateStr);
-                    const isToday = (i === 0);
-
-                    const d = new Date();
-                    d.setDate(d.getDate() - i);
-                    const dayName = dayNames[d.getDay()];
-
-                    const wrapper = document.createElement('div');
-                    wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
-
-                    const dot = document.createElement('div');
-                    dot.className = `streak-dot ${wasActive ? (isToday ? 'today-active' : 'active') : 'inactive'}`;
-                    dot.innerText = wasActive ? (isToday ? '🔥' : '✓') : '';
-                    if (!wasActive) dot.style.opacity = '0.5';
-
-                    const lbl = document.createElement('div');
-                    lbl.className = 'streak-dot-label';
-                    lbl.innerText = isToday ? 'Today' : dayName;
-
-                    wrapper.appendChild(dot);
-                    wrapper.appendChild(lbl);
-                    trail.appendChild(wrapper);
-                }
-            }
-        }
-
-        // ── PDF UPLOAD ───────────────────────────────────────
-        let localDocumentContext = "";
-        function triggerFilePicker() { document.getElementById('pdf-file-picker').click(); }
-        function processLocalFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                localDocumentContext = `[Uploaded Course Material: ${file.name}]:\n${e.target.result.slice(0, 8000)}`;
-                const statusEl = document.getElementById('file-upload-status');
-                statusEl.style.display = "block";
-                statusEl.innerText = `✅ Context Loaded: ${file.name}`;
-            };
-            reader.readAsText(file);
-        }
-
-        // ── CHAT ─────────────────────────────────────────────
-        function forceResetKeyInChat() {
-            const k = prompt("Enter your Google Gemini API Key:");
-            if (k && k.trim() !== "") {
-                localStorage.setItem('medanixx_api_key', k.trim());
-                alert("Key updated successfully!");
-            }
-        }
-
-        async function handleSendMessage() {
-            const chatInput = document.querySelector('.chat-input');
-            const chatHistory = document.querySelector('.chat-history');
-            if (!chatInput || !chatHistory) return;
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            const userMsg = document.createElement('div');
-            userMsg.className = 'msg msg-user';
-            userMsg.innerHTML = `<div class="msg-bubble">${text}</div>`;
-            chatHistory.appendChild(userMsg);
-            chatInput.value = '';
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-
-            const aiMsg = document.createElement('div');
-            aiMsg.className = 'msg msg-ai';
-            aiMsg.innerHTML = `<div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
-            chatHistory.appendChild(aiMsg);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-
-            let GEMINI_API_KEY = localStorage.getItem('medanixx_api_key');
-            if (!GEMINI_API_KEY) {
-                GEMINI_API_KEY = prompt("No key linked! Paste your Google Gemini API Key:");
-                if (GEMINI_API_KEY && GEMINI_API_KEY.trim() !== "") {
-                    localStorage.setItem('medanixx_api_key', GEMINI_API_KEY.trim());
-                } else {
-                    aiMsg.querySelector('.msg-bubble').innerText = "⚠️ An API key is required to power chat.";
-                    return;
-                }
-            }
-
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-            let finalPromptText = `You are Medanixx AI, an elite college tutor assistant. Help the student out with emojis. Prompt: ${text}`;
-            if (localDocumentContext !== "") {
-                finalPromptText = `${localDocumentContext}\n\nUsing the document above, answer: ${text}`;
-            }
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: finalPromptText }] }] })
-                });
-                if (!response.ok) {
-                    localStorage.removeItem('medanixx_api_key');
-                    aiMsg.querySelector('.msg-bubble').innerText = "⚠️ Key failure. Click 'Set Key' to update.";
-                    return;
-                }
-                const data = await response.json();
-                let reply = data.candidates[0].content.parts[0].text;
-                reply = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                aiMsg.querySelector('.msg-bubble').innerHTML = reply;
-                chatHistory.scrollTop = chatHistory.scrollHeight;
-            } catch (error) {
-                localStorage.removeItem('medanixx_api_key');
-                aiMsg.querySelector('.msg-bubble').innerText = "⚠️ Network error. Check connection or click 'Set Key'.";
-            }
-        }
-
-        const targetInput = document.querySelector('.chat-input');
-        const targetBtn = document.querySelector('.chat-send-btn');
-        if (targetBtn) targetBtn.addEventListener('click', handleSendMessage);
-        if (targetInput) targetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSendMessage(); });
-
-        // ── EXAM ─────────────────────────────────────────────
-        let examTimerInterval = null;
-        let examTimeRemaining = 1800;
-        let currentExamQuestionIndex = 0;
-        let userSelectedAnswers = {};
-        let examDocumentContext = "";
-        let activeExamQuestions = [];
-
-        // ── Exam PDF upload handlers ──
-        function handleExamFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                examDocumentContext = e.target.result.slice(0, 9000);
-                document.getElementById('exam-file-name').innerText = file.name;
-                document.getElementById('exam-file-badge').style.display = 'flex';
-                document.getElementById('exam-dropzone').style.borderColor = 'var(--success)';
-                const aiBtn = document.getElementById('exam-ai-btn');
-                aiBtn.disabled = false;
-                aiBtn.style.opacity = '1';
-                aiBtn.style.cursor = 'pointer';
-            };
-            reader.readAsText(file);
-        }
-
-        function clearExamFile() {
-            examDocumentContext = "";
-            document.getElementById('exam-file-badge').style.display = 'none';
-            document.getElementById('exam-dropzone').style.borderColor = 'var(--border-color)';
-            document.getElementById('exam-pdf-picker').value = '';
-            const aiBtn = document.getElementById('exam-ai-btn');
-            aiBtn.disabled = true;
-            aiBtn.style.opacity = '0.45';
-            aiBtn.style.cursor = 'not-allowed';
-        }
-
-        const generatingMessages = [
-            "Analysing your document...",
-            "Identifying key concepts...",
-            "Crafting exam questions...",
-            "Verifying answer options...",
-            "Almost ready..."
-        ];
-        let generatingMsgInterval = null;
-
-        async function generateAIExam() {
-            let GEMINI_API_KEY = localStorage.getItem('medanixx_api_key');
-            if (!GEMINI_API_KEY) {
-                GEMINI_API_KEY = prompt("Paste your Google Gemini API Key to generate AI questions:");
-                if (GEMINI_API_KEY && GEMINI_API_KEY.trim() !== "") {
-                    localStorage.setItem('medanixx_api_key', GEMINI_API_KEY.trim());
-                } else {
-                    alert("⚠️ API key required to generate AI questions.");
-                    return;
-                }
-            }
-
-            document.getElementById('exam-dropzone').style.display = 'none';
-            document.getElementById('exam-file-badge').style.display = 'none';
-            document.getElementById('exam-ai-btn').style.display = 'none';
-            document.getElementById('exam-generating-box').style.display = 'block';
-
-            let msgIdx = 0;
-            const labelEl = document.getElementById('exam-generating-label');
-            generatingMsgInterval = setInterval(() => {
-                msgIdx = (msgIdx + 1) % generatingMessages.length;
-                labelEl.innerText = generatingMessages[msgIdx];
-            }, 1800);
-
-            const aiPrompt = `You are an exam question generator for a medical/university student study app called Medanixx.
-
-Based on the following course material, generate as many high-quality multiple-choice exam questions as the material reasonably supports, up to a maximum of 70 questions. Generate at least 10 if the material allows.
-
-STRICT RULES:
-- Each question must have exactly 4 options: A, B, C, D
-- Vary which letter is correct across the set (do not always pick the same letter)
-- Questions must be directly based on the content below
-- Do not repeat the same question or trivially reword it
-- Return ONLY valid JSON, no markdown, no code fences, no explanation
-
-Return this exact JSON format:
-[
-  {
-    "q": "Question text here?",
-    "options": { "A": "Option A", "B": "Option B", "C": "Option C", "D": "Option D" },
-    "correct": "A"
-  }
-]
-
-COURSE MATERIAL:
-${examDocumentContext}`;
-
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: aiPrompt }] }] })
-                });
-
-                clearInterval(generatingMsgInterval);
-
-                if (!response.ok) {
-                    localStorage.removeItem('medanixx_api_key');
-                    resetExamSetupUI();
-                    alert("⚠️ API key rejected. Update it via Set Key in the Chat tab.");
-                    return;
-                }
-
-                const data = await response.json();
-                let raw = data.candidates[0].content.parts[0].text;
-                raw = raw.replace(/```json|```/g, '').trim();
-                const parsed = JSON.parse(raw);
-                if (!Array.isArray(parsed) || parsed.length < 3) throw new Error("Bad format");
-
-                activeExamQuestions = parsed.slice(0, 70);
-                document.getElementById('exam-course-title').innerText = `AI-Generated · ${activeExamQuestions.length} Qs · ` + document.getElementById('exam-file-name').innerText;
-                resetExamSetupUI();
-                startExamSimulation();
-
-            } catch (err) {
-                clearInterval(generatingMsgInterval);
-                resetExamSetupUI();
-                alert("⚠️ Could not parse AI questions. Please try again, or try a document with more text content.");
-            }
-        }
-
-        function resetExamSetupUI() {
-            document.getElementById('exam-generating-box').style.display = 'none';
-            document.getElementById('exam-dropzone').style.display = 'block';
-            document.getElementById('exam-ai-btn').style.display = 'block';
-            if (examDocumentContext) document.getElementById('exam-file-badge').style.display = 'flex';
-        }
-
-        function startExamSimulation() {
-            if (!activeExamQuestions || activeExamQuestions.length === 0) {
-                alert("⚠️ No questions available. Please upload a document and generate an exam first.");
-                return;
-            }
-            window._currentExamSet = activeExamQuestions;
-            document.getElementById('exam-setup-box').style.display = "none";
-            document.getElementById('exam-quiz-box').style.display = "block";
-            document.getElementById('exam-scorecard-box').style.display = "none";
-            examTimeRemaining = 1800; currentExamQuestionIndex = 0; userSelectedAnswers = {};
-            clearInterval(examTimerInterval);
-            examTimerInterval = setInterval(updateExamClock, 1000);
-            renderExamQuestion();
-        }
-
-        function updateExamClock() {
-            if (examTimeRemaining <= 0) { clearInterval(examTimerInterval); evaluateExamSubmission(); return; }
-            examTimeRemaining--;
-            const mins = Math.floor(examTimeRemaining / 60);
-            const secs = examTimeRemaining % 60;
-            document.getElementById('exam-timer-clock').innerText = `⏱️ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-        }
-
-        function renderExamQuestion() {
-            const qs = window._currentExamSet || activeExamQuestions;
-            const q = qs[currentExamQuestionIndex];
-            document.getElementById('exam-question-number').innerText = `Question ${currentExamQuestionIndex + 1} of ${qs.length}`;
-            document.getElementById('exam-question-text').innerText = q.q;
-            const optionsContainer = document.getElementById('exam-options-list');
-            optionsContainer.innerHTML = "";
-            Object.entries(q.options).forEach(([key, value]) => {
-                const btn = document.createElement('button');
-                btn.className = `option-btn ${userSelectedAnswers[currentExamQuestionIndex] === key ? 'selected' : ''}`;
-                btn.innerHTML = `<strong>${key}:</strong> ${value}`;
-                btn.onclick = () => { userSelectedAnswers[currentExamQuestionIndex] = key; renderExamQuestion(); };
-                optionsContainer.appendChild(btn);
-            });
-            document.getElementById('exam-next-btn').innerText = (currentExamQuestionIndex === qs.length - 1) ? "Submit Exam" : "Next";
-        }
-
-        function navigateExam(direction) {
-            const qs = window._currentExamSet || activeExamQuestions;
-            if (direction === 1) {
-                if (currentExamQuestionIndex === qs.length - 1) { evaluateExamSubmission(); return; }
-                currentExamQuestionIndex++;
-            } else {
-                if (currentExamQuestionIndex === 0) return;
-                currentExamQuestionIndex--;
-            }
-            renderExamQuestion();
-        }
-
-        function evaluateExamSubmission() {
-            clearInterval(examTimerInterval);
-            const qs = window._currentExamSet || activeExamQuestions;
-            let score = 0;
-            qs.forEach((q, i) => { if (userSelectedAnswers[i] === q.correct) score++; });
-            const pct = Math.round((score / qs.length) * 100);
-            document.getElementById('exam-quiz-box').style.display = "none";
-            document.getElementById('exam-scorecard-box').style.display = "block";
-            document.getElementById('exam-final-score').innerText = `${pct}%`;
-            document.getElementById('exam-score-breakdown').innerText = `You correctly answered ${score} out of ${qs.length} questions.`;
-            incrementExamCount();
-            recordExamScore(pct);
-        }
-
-        function exitExamReview() {
-            window._currentExamSet = null;
-            activeExamQuestions = [];
-            examDocumentContext = "";
-            document.getElementById('exam-file-badge').style.display = 'none';
-            document.getElementById('exam-dropzone').style.borderColor = 'var(--border-color)';
-            document.getElementById('exam-pdf-picker').value = '';
-            const aiBtn = document.getElementById('exam-ai-btn');
-            aiBtn.disabled = true;
-            aiBtn.style.opacity = '0.45';
-            aiBtn.style.cursor = 'not-allowed';
-            document.getElementById('exam-course-title').innerText = "Simulation Engine Modality";
-            document.getElementById('exam-setup-box').style.display = "block";
-            document.getElementById('exam-quiz-box').style.display = "none";
-            document.getElementById('exam-scorecard-box').style.display = "none";
-            switchScreen('home');
-        }
-
-        // ── GLOBAL HELPERS ───────────────────────────────────
-        const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('light-theme');
-                themeToggleBtn.innerText = document.body.classList.contains('light-theme') ? '🌙' : '☀️';
-            });
-        }
-
-        document.getElementById('app-logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('m2_active_email');
-            localStorage.removeItem('m2_active_name');
-            window.location.reload();
-        });
-
-        function resetApiKey() { forceResetKeyInChat(); }
-
-        const togglePasswordLink = document.getElementById('toggle-password-visibility');
-        if (togglePasswordLink && passwordInput) {
-            togglePasswordLink.addEventListener('click', () => {
-                passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
-                togglePasswordLink.innerText = passwordInput.type === 'password' ? '👁️ Show Password' : '🙈 Hide Password';
-            });
-        }
-
-        // Toggle visibility for change-password fields on Profile page
-        const togglePwdFieldsLink = document.getElementById('toggle-password-fields-visibility');
-        if (togglePwdFieldsLink) {
-            togglePwdFieldsLink.addEventListener('click', () => {
-                const fields = [
-                    document.getElementById('current-password-input'),
-                    document.getElementById('new-password-input'),
-                    document.getElementById('confirm-password-input')
-                ];
-                const showing = fields[0].type === 'password';
-                fields.forEach(f => { if (f) f.type = showing ? 'text' : 'password'; });
-                togglePwdFieldsLink.innerText = showing ? '🙈 Hide Passwords' : '👁️ Show Passwords';
-            });
-        }
-    </script>
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Server Error");
+
+        removeTypingIndicator();
+        finishProgressBar();
+
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'msg msg-ai';
+        aiDiv.innerHTML = `<div class="msg-bubble" style="background:var(--bg-surface)!important;border:1px solid var(--border-color);border-radius:16px 16px 16px 4px;color:var(--text-primary)!important;">${data.reply}</div>`;
+        chatHistoryContainer.appendChild(aiDiv);
+        saveMsgToStorage('ai', data.reply);
+
+    } catch (err) {
+        console.error("Chat pipeline failure:", err);
+        removeTypingIndicator();
+        finishProgressBar();
+        appendErrorBubble(text);
+    }
+
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+    isChatLoading = false;
+    chatSendBtn.disabled = false;
+}
+
+async function retryLastMessage(btn, originalText) {
+    // Remove the error bubble
+    const errorMsg = btn.closest('.msg');
+    if (errorMsg) errorMsg.remove();
+    await sendMessage(originalText);
+}
+
+if (chatSendBtn) chatSendBtn.addEventListener('click', () => sendMessage(chatInputField.value));
+if (chatInputField) chatInputField.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) sendMessage(chatInputField.value); });
+
+// Clear chat history button
+const clearChatBtn = document.getElementById('clear-chat-btn');
+if (clearChatBtn) {
+    clearChatBtn.addEventListener('click', () => {
+        if (!confirm('Clear all chat history? This cannot be undone.')) return;
+        if (currentUserEmail) localStorage.removeItem(getChatKey());
+        loadChatHistory();
+    });
+}
+
+// ════════════════════════════════════════════════
+// HOME PDF UPLOAD
+// ════════════════════════════════════════════════
+function triggerFilePicker() { document.getElementById('pdf-file-picker').click(); }
+async function processLocalFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('file-upload-status');
+    if (statusEl) { statusEl.style.display="block"; statusEl.innerText=`⏳ Analysing: ${file.name}...`; }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+        const response = await fetch("http://127.0.0.1:5000/api/upload", { method:"POST", body:formData });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || `Server error ${response.status}`);
+        if (statusEl) statusEl.innerText = `✅ Context Loaded: ${file.name}! ${data.questions.length} exam questions generated.`;
+        window.generatedQuestions = data.questions;
+    } catch (error) {
+        console.error("Home upload error:", error);
+        if (statusEl) statusEl.innerText = "❌ Failed to generate questions. " + error.message;
+    }
+}
+
+// ════════════════════════════════════════════════
+// EXAM
+// ════════════════════════════════════════════════
+let examTimerInterval = null, examTimeRemaining = 1800;
+let currentExamQuestionIndex = 0, userSelectedAnswers = {};
+let examDocumentContext = "", activeExamQuestions = [];
+
+function handleExamFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    document.getElementById('exam-file-name').innerText = file.name;
+    document.getElementById('exam-file-badge').style.display = 'flex';
+    document.getElementById('exam-dropzone').style.borderColor = 'var(--success)';
+    examDocumentContext = file.name; // store name as context marker for FormData upload
+    const aiBtn = document.getElementById('exam-ai-btn');
+    aiBtn.disabled = false; aiBtn.style.opacity = '1'; aiBtn.style.cursor = 'pointer';
+    // Store file ref for later upload
+    window._examFile = file;
+}
+
+function clearExamFile() {
+    examDocumentContext = ""; window._examFile = null;
+    document.getElementById('exam-file-badge').style.display = 'none';
+    document.getElementById('exam-dropzone').style.borderColor = 'var(--border-color)';
+    document.getElementById('exam-pdf-picker').value = '';
+    const aiBtn = document.getElementById('exam-ai-btn');
+    aiBtn.disabled = true; aiBtn.style.opacity = '0.45'; aiBtn.style.cursor = 'not-allowed';
+}
+
+const generatingMessages = ["Analysing your document...","Identifying key concepts...","Crafting exam questions...","Verifying answer options...","Almost ready..."];
+let generatingMsgInterval = null;
+
+async function generateAIExam() {
+    if (!window._examFile) { alert("Please upload a file first."); return; }
+    document.getElementById('exam-dropzone').style.display = 'none';
+    document.getElementById('exam-file-badge').style.display = 'none';
+    document.getElementById('exam-ai-btn').style.display = 'none';
+    document.getElementById('exam-generating-box').style.display = 'block';
+
+    let msgIdx = 0;
+    const labelEl = document.getElementById('exam-generating-label');
+    generatingMsgInterval = setInterval(() => {
+        msgIdx = (msgIdx + 1) % generatingMessages.length;
+        labelEl.innerText = generatingMessages[msgIdx];
+    }, 1800);
+
+    try {
+        const formData = new FormData();
+        formData.append("file", window._examFile);
+        const response = await fetch("http://127.0.0.1:5000/api/upload", { method:"POST", body:formData });
+        const data = await response.json();
+        clearInterval(generatingMsgInterval);
+
+        if (!response.ok) throw new Error(data.error || "Upload failed");
+        if (!Array.isArray(data.questions) || data.questions.length < 3) throw new Error("Not enough questions returned.");
+
+        // Map backend question format {question, options:[], answer} → {q, options:{A,B,C,D}, correct}
+        activeExamQuestions = data.questions.map(q => {
+            const opts = {};
+            (q.options || []).forEach((o, i) => { opts[String.fromCharCode(65+i)] = o; });
+            // find correct letter
+            const correctLetter = Object.keys(opts).find(k => opts[k] === q.answer) || 'A';
+            return { q: q.question, options: opts, correct: correctLetter, explanation: q.explanation };
+        }).slice(0, 70);
+
+        document.getElementById('exam-course-title').innerText = `AI-Generated · ${activeExamQuestions.length} Qs · ${window._examFile.name}`;
+        resetExamSetupUI();
+        startExamSimulation();
+
+    } catch (err) {
+        clearInterval(generatingMsgInterval);
+        resetExamSetupUI();
+        alert("⚠️ " + (err.message || "Could not parse AI questions. Please try again."));
+    }
+}
+
+function resetExamSetupUI() {
+    document.getElementById('exam-generating-box').style.display = 'none';
+    document.getElementById('exam-dropzone').style.display = 'block';
+    document.getElementById('exam-ai-btn').style.display = 'block';
+    if (examDocumentContext) document.getElementById('exam-file-badge').style.display = 'flex';
+}
+function startExamSimulation() {
+    if (!activeExamQuestions || activeExamQuestions.length === 0) { alert("⚠️ No questions available."); return; }
+    window._currentExamSet = activeExamQuestions;
+    document.getElementById('exam-setup-box').style.display = "none";
+    document.getElementById('exam-quiz-box').style.display = "block";
+    document.getElementById('exam-scorecard-box').style.display = "none";
+    examTimeRemaining = 1800; currentExamQuestionIndex = 0; userSelectedAnswers = {};
+    clearInterval(examTimerInterval);
+    examTimerInterval = setInterval(updateExamClock, 1000);
+    renderExamQuestion();
+}
+function updateExamClock() {
+    if (examTimeRemaining <= 0) { clearInterval(examTimerInterval); evaluateExamSubmission(); return; }
+    examTimeRemaining--;
+    const mins = Math.floor(examTimeRemaining/60), secs = examTimeRemaining%60;
+    document.getElementById('exam-timer-clock').innerText = `⏱️ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+}
+function renderExamQuestion() {
+    const qs = window._currentExamSet || activeExamQuestions;
+    const q  = qs[currentExamQuestionIndex];
+    document.getElementById('exam-question-number').innerText = `Question ${currentExamQuestionIndex+1} of ${qs.length}`;
+    document.getElementById('exam-question-text').innerText = q.q;
+    const optionsContainer = document.getElementById('exam-options-list');
+    optionsContainer.innerHTML = "";
+    Object.entries(q.options).forEach(([key,value]) => {
+        const btn = document.createElement('button');
+        btn.className = `option-btn ${userSelectedAnswers[currentExamQuestionIndex]===key?'selected':''}`;
+        btn.innerHTML = `<strong>${key}:</strong> ${value}`;
+        btn.onclick = () => { userSelectedAnswers[currentExamQuestionIndex]=key; renderExamQuestion(); };
+        optionsContainer.appendChild(btn);
+    });
+    document.getElementById('exam-next-btn').innerText = (currentExamQuestionIndex===qs.length-1) ? "Submit Exam" : "Next";
+}
+function navigateExam(direction) {
+    const qs = window._currentExamSet || activeExamQuestions;
+    if (direction===1) { if (currentExamQuestionIndex===qs.length-1) { evaluateExamSubmission(); return; } currentExamQuestionIndex++; }
+    else { if (currentExamQuestionIndex===0) return; currentExamQuestionIndex--; }
+    renderExamQuestion();
+}
+function evaluateExamSubmission() {
+    clearInterval(examTimerInterval);
+    const qs=window._currentExamSet||activeExamQuestions;
+    let score=0;
+    qs.forEach((q,i) => { if(userSelectedAnswers[i]===q.correct) score++; });
+    const pct = Math.round((score/qs.length)*100);
+    document.getElementById('exam-quiz-box').style.display="none";
+    document.getElementById('exam-scorecard-box').style.display="block";
+    document.getElementById('exam-final-score').innerText=`${pct}%`;
+    document.getElementById('exam-score-breakdown').innerText=`You correctly answered ${score} out of ${qs.length} questions.`;
+    incrementExamCount();
+    recordExamScore(pct);
+}
+function exitExamReview() {
+    window._currentExamSet=null; activeExamQuestions=[]; examDocumentContext=""; window._examFile=null;
+    document.getElementById('exam-file-badge').style.display='none';
+    document.getElementById('exam-dropzone').style.borderColor='var(--border-color)';
+    document.getElementById('exam-pdf-picker').value='';
+    document.getElementById('exam-course-title').innerText='Simulation Engine Modality';
+    const aiBtn=document.getElementById('exam-ai-btn'); aiBtn.disabled=true; aiBtn.style.opacity='0.45'; aiBtn.style.cursor='not-allowed';
+    document.getElementById('exam-setup-box').style.display="block";
+    document.getElementById('exam-quiz-box').style.display="none";
+    document.getElementById('exam-scorecard-box').style.display="none";
+    switchScreen('home');
+}
+
+// ════════════════════════════════════════════════
+// GLOBAL HELPERS
+// ════════════════════════════════════════════════
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        themeToggleBtn.innerText = document.body.classList.contains('light-theme') ? '🌙' : '☀️';
+    });
+}
+
+document.getElementById('app-logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('m2_active_email');
+    localStorage.removeItem('m2_active_name');
+    sessionStorage.removeItem('m2_active_email');
+    sessionStorage.removeItem('m2_active_name');
+    window.location.reload();
+});
+
+const togglePasswordLink = document.getElementById('toggle-password-visibility');
+if (togglePasswordLink && passwordInput) {
+    togglePasswordLink.addEventListener('click', () => {
+        passwordInput.type = passwordInput.type==='password' ? 'text' : 'password';
+        togglePasswordLink.innerText = passwordInput.type==='password' ? '👁️ Show Password' : '🙈 Hide Password';
+    });
+}
+const togglePwdFieldsLink = document.getElementById('toggle-password-fields-visibility');
+if (togglePwdFieldsLink) {
+    togglePwdFieldsLink.addEventListener('click', () => {
+        const fields = ['current-password-input','new-password-input','confirm-password-input'].map(id=>document.getElementById(id));
+        const showing = fields[0].type==='password';
+        fields.forEach(f => { if(f) f.type=showing?'text':'password'; });
+        togglePwdFieldsLink.innerText = showing ? '🙈 Hide Passwords' : '👁️ Show Passwords';
+    });
+}
+</script>
 </body>
 </html>

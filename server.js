@@ -1,7 +1,6 @@
-/**
- * ============================================================
+/** * ============================================================
  * MEDANIXX (MDX) — Preclinical Study App
- * server.js — Main Backend Server (Gemini Version)
+ * server.js — Main Backend Server (Full Document & Quiz Version)
  * Built for: UNN 100 Level Students
  * ============================================================
  */
@@ -9,8 +8,6 @@
 "use strict";
 
 const express        = require("express");
-const multer         = require("multer");
-const pdfParse       = require("pdf-parse");
 const cors           = require("cors");
 const dotenv         = require("dotenv");
 const morgan         = require("morgan");
@@ -18,284 +15,305 @@ const helmet         = require("helmet");
 const rateLimit      = require("express-rate-limit");
 const path           = require("path");
 const fs             = require("fs");
-const { v4: uuidv4 } = require("uuid");
+const os             = require("os");
+const multer         = require("multer");
+const pdfParse       = require("pdf-parse").default || require("pdf-parse");
+const Tesseract      = require("tesseract.js");
+const Groq           = require("groq-sdk");
 
-dotenv.config();
+// ── Environment Variable Resolution ─────────────────────────
+const localEnvPath  = path.resolve(__dirname, ".env");
+const parentEnvPath = path.resolve(__dirname, "../.env");
 
-// ── Google Gemini AI Setup ─────────────────────────────────────
-let geminiModel = null;
-try {
-  const { GoogleGenerativeAI } = require("@google/generative-ai");
-  if (process.env.GEMINI_API_KEY) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    console.log("✅ Gemini AI initialized — AI quiz generation enabled.");
-  } else {
-    console.log("⚠️  No GEMINI_API_KEY found in .env — using rule-based quiz generation.");
-  }
-} catch (err) {
-  console.log("ℹ️  @google/generative-ai setup skipped or missing.");
+if (fs.existsSync(localEnvPath)) {
+  dotenv.config({ path: localEnvPath });
+} else if (fs.existsSync(parentEnvPath)) {
+  dotenv.config({ path: parentEnvPath });
+} else {
+  dotenv.config();
+}
+
+// ── Groq AI Setup ─────────────────────────────────────────────
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+let groqClient = null;
+if (GROQ_API_KEY) {
+  groqClient = new Groq({ apiKey: GROQ_API_KEY });
+  console.log("✅ Groq AI initialized — Speed mode active.");
+} else {
+  console.log("⚠️  No GROQ_API_KEY found. Set it in your .env file.");
 }
 
 const app  = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-const store = {
-  documents: {},  
-  quizzes:   {},  
-  sessions:  {},  
-};
-
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// ── Multer File Upload Setup ──────────────────────────────────
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB file size limit
+});
 
 // ── Middleware ────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  credentials: true,
+}));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
-app.use(express.static(path.join(__dirname, "public")));
 
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50,
+  max: 100,
   message: { error: "Too many requests. Please wait a moment." },
 });
 
-// ── Multer Config ─────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
-  filename:    (_req, file, cb) => {
-    const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
-    cb(null, `${uuidv4()}_${safe}`);
-  },
-});
+// ── JSON Cleaner — strips markdown fences Groq sometimes adds ─
+function cleanJsonResponse(raw) {
+  let cleaned = raw.trim();
+  cleaned = cleaned.replace(/^```json\s*/i, "");
+  cleaned = cleaned.replace(/^```\s*/i, "");
+  cleaned = cleaned.replace(/```\s*$/i, "");
+  cleaned = cleaned.trim();
+  const objectMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (objectMatch) cleaned = objectMatch[0];
+  return cleaned;
+}
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 },
-  fileFilter: (_req, file, cb) => {
-    if (file.mimetype !== "application/pdf") {
-      return cb(new Error("Only PDF files are accepted."));
-    }
-    cb(null, true);
-  },
-});
+// ── OCR Helper — extracts text from scanned/image-based PDFs ──
+// Uses pdfjs-dist (pure JS) + canvas to render pages, then Tesseract OCR.
+// No system binaries required — works on Windows, Mac, and Linux.
+async function extractTextFromScannedPDF(fileBuffer) {
+const pdfjsLib = require("pdfjs-dist/legacy/build/pdf.js");
+  const { createCanvas } = require("canvas");
 
-// ── Helpers & Rule-Based Fallback Engine ───────────────────────
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  console.log("🔍 [OCR] Loading PDF with pdfjs...");
+
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(fileBuffer) });
+  const pdfDoc = await loadingTask.promise;
+  const numPages = pdfDoc.numPages;
+
+  console.log(`🔍 [OCR] PDF has ${numPages} page(s). Running OCR...`);
+
+  let fullText = "";
+
+  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    const page     = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 2.0 }); // 2x scale for better OCR accuracy
+
+    // Render the PDF page onto a Node canvas
+    const canvas  = createCanvas(viewport.width, viewport.height);
+    const context = canvas.getContext("2d");
+
+    await page.render({ canvasContext: context, viewport }).promise;
+
+    // Export canvas to PNG buffer (no temp files needed)
+    const imgBuffer = canvas.toBuffer("image/png");
+
+    console.log(`🔍 [OCR] Tesseract on page ${pageNum}/${numPages}...`);
+
+    // Run Tesseract OCR directly on the PNG buffer
+    const { data: { text } } = await Tesseract.recognize(imgBuffer, "eng", {
+      logger: m => {
+        if (m.status === "recognizing text") {
+          process.stdout.write(`\r🔍 [OCR] Page ${pageNum}: ${Math.round(m.progress * 100)}%`);
+        }
+      },
+    });
+
+    fullText += text + "\n";
   }
-  return a;
+
+  console.log("\n✅ [OCR] Text extraction complete.");
+  return fullText.trim();
 }
 
-function cleanText(text) {
-  return text
-    .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/[^\x20-\x7E\n]/g, " ")
-    .trim();
-}
-
-function extractFactSentences(text) {
-  return text
-    .split(/(?<=[.!?])\s+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 60 && s.length < 400)
-    .filter(s => /\b(is|are|was|were|causes|produces|defined|classified|function|process|reaction|equation|law|theory|principle|cell|molecule)\b/i.test(s));
-}
-
-function makeFillBlank(sentence) {
-  const words = sentence.split(/\s+/).filter(w =>
-    w.length > 5 && /^[A-Za-z]/.test(w) &&
-    !/^(which|these|their|those|there|about|would|could|should|after|before|during|while|because|however|therefore)$/i.test(w)
-  );
-  if (!words.length) return null;
-  const answer = words[Math.floor(words.length / 2)].replace(/[.,;:()]/g, "");
-  return {
-    id: uuidv4(), type: "fill_blank",
-    question: `Complete: "${sentence.replace(answer, "___________")}"`,
-    answer, explanation: `The correct word is "${answer}".`,
-  };
-}
-
-function makeTrueFalse(sentence) {
-  const swaps = [
-    ["increases","decreases"],["produces","destroys"],["high","low"],
-    ["positive","negative"],["directly","inversely"],["acid","base"]
-  ];
-  let statement = sentence;
-  let isTrue = true;
-  if (Math.random() > 0.5) {
-    for (const [from, to] of swaps) {
-      if (new RegExp(`\\b${from}\\b`, "i").test(statement)) {
-        statement = statement.replace(new RegExp(`\\b${from}\\b`, "i"), to);
-        isTrue = false;
-        break;
-      }
-    }
-  }
-  return {
-    id: uuidv4(), type: "true_false",
-    question: `True or False: "${statement}"`,
-    options: ["True", "False"],
-    answer: isTrue ? "True" : "False",
-    explanation: isTrue ? "This statement is correct." : `Altered statement.`,
-  };
-}
-
-function generateRuleBasedQuiz(text, num = 10) {
-  const facts = extractFactSentences(text);
-  if (facts.length < 3) return [];
-  const questions = [];
-  for (const sentence of shuffle(facts)) {
-    if (questions.length >= num) break;
-    const q = Math.random() > 0.5 ? makeFillBlank(sentence) : makeTrueFalse(sentence);
-    if (q) questions.push(q);
-  }
-  return questions;
-}
-
-// ── Gemini AI Logic ───────────────────────────────────────────
-async function generateGeminiQuiz(text, numQuestions = 10, difficulty = "medium", course = "General") {
-  if (!geminiModel) {
-    return { questions: generateRuleBasedQuiz(text, numQuestions), method: "rule-based" };
-  }
-  const excerpt = cleanText(text).slice(0, 6000);
-  const prompt = `You are an expert science educator creating a quiz for 100-level university students studying ${course}.
-Generate exactly ${numQuestions} multiple-choice questions (MCQs) based on the content below.
-Difficulty: ${difficulty}
-
-Return ONLY a valid JSON object. No extra text, no markdown code fences.
-Format:
-{
-  "questions": [
-    {
-      "id": "unique_string",
-      "type": "mcq",
-      "question": "Question text?",
-      "options": ["A. Option one", "B. Option two", "C. Option three", "D. Option four"],
-      "answer": "A. Option one",
-      "explanation": "Explanation here."
-    }
-  ]
-}
-Content:
-${excerpt}`;
-
+// ── Core AI Helper ────────────────────────────────────────────
+async function groqChat(userMessage, systemPrompt, isJsonExpected = false) {
+  if (!groqClient) return "AI Tutor configuration missing. Please set your GROQ_API_KEY.";
   try {
-    const result = await geminiModel.generateContent(prompt);
-    const raw    = result.response.text();
-    const cleaned = raw.replace(/```json|```/g, "").trim();
-    const parsed  = JSON.parse(cleaned);
-    parsed.questions = parsed.questions.map(q => ({ ...q, id: q.id || uuidv4() }));
-    return { questions: parsed.questions, method: "gemini-ai" };
-  } catch (err) {
-    return { questions: generateRuleBasedQuiz(text, numQuestions), method: "rule-based-fallback" };
-  }
-}
+    const options = {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user",   content: userMessage  },
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1,
+      max_tokens: 4000,
+    };
 
-async function geminiChat(message, subject = "General") {
-  if (!geminiModel) return "AI Tutor is not configured. Add GEMINI_API_KEY to .env.";
-  const prompt = `You are MDX AI, an intelligent study assistant for 100-level university students in Nigeria studying ${subject}. Explain concepts clearly and concisely. Use bullet points for lists.\nStudent: ${message}`;
-  try {
-    const result = await geminiModel.generateContent(prompt);
-    return result.response.text();
+    if (isJsonExpected) {
+      options.response_format = { type: "json_object" };
+    }
+
+    const completion = await groqClient.chat.completions.create(options);
+    return completion.choices[0]?.message?.content || "";
   } catch (err) {
-    return "Sorry, I couldn't process that response. Please try again.";
+    console.error("🔥 Groq Handshake API Error:", err.message);
+    return "";
   }
 }
 
 // ── API Routes ────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", app: "Medanixx (MDX)", aiEnabled: !!geminiModel, documents: Object.keys(store.documents).length });
+  res.json({ status: "ok", app: "Medanixx (MDX)", aiEnabled: !!groqClient });
 });
 
-app.post("/api/pdf/upload", upload.single("pdf"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "No PDF file received." });
-    const buffer = fs.readFileSync(req.file.path);
-    const parsed = await pdfParse(buffer);
-
-    const doc = {
-      id: uuidv4(),
-      name: req.body.name || req.file.originalname,
-      filename: req.file.filename,
-      path: req.file.path,
-      text: parsed.text,
-      pages: parsed.numpages,
-      sizeKB: (req.file.size / 1024).toFixed(1),
-      wordCount: parsed.text.split(/\s+/).length,
-      course: req.body.course || "General",
-      uploadedAt: new Date().toISOString(),
-    };
-    store.documents[doc.id] = doc;
-    res.status(201).json({ message: "PDF processed.", document: { id: doc.id, name: doc.name, pages: doc.pages, course: doc.course } });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to process PDF.", detail: err.message });
-  }
-});
-
-app.get("/api/pdf/list", (_req, res) => {
-  res.json({ documents: Object.values(store.documents) });
-});
-
-app.post("/api/quiz/generate", aiLimiter, async (req, res) => {
-  try {
-    const { docId, difficulty = "medium", title } = req.body;
-    const numQuestions = Math.min(parseInt(req.body.numQuestions) || 10, 30);
-    const doc = store.documents[docId];
-    if (!doc) return res.status(404).json({ error: "Document not found." });
-
-    const { questions, method } = await generateGeminiQuiz(doc.text, numQuestions, difficulty, doc.course);
-    const quiz = { id: uuidv4(), docId, title: title || `${doc.name} — Quiz`, course: doc.course, difficulty, method, questions, numQuestions: questions.length, createdAt: new Date().toISOString() };
-    store.quizzes[quiz.id] = quiz;
-    res.status(201).json({ quiz });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to generate quiz." });
-  }
-});
-
-app.post("/api/quiz/:id/submit", (req, res) => {
-  const quiz = store.quizzes[req.params.id];
-  if (!quiz) return res.status(404).json({ error: "Quiz not found." });
-  const { answers = {} } = req.body;
-  let correct = 0;
-
-  const feedback = quiz.questions.map(q => {
-    const userAnswer = (answers[q.id] || "").toString().trim().toLowerCase();
-    const correctAnswer = q.answer.toString().trim().toLowerCase();
-    const isCorrect = userAnswer === correctAnswer;
-    if (isCorrect) correct++;
-    return { questionId: q.id, question: q.question, userAnswer, correctAnswer, isCorrect, explanation: q.explanation };
-  });
-
-  const total = quiz.questions.length;
-  const score = Math.round((correct / total) * 100);
-  res.json({ score, percentage: `${score}%`, correct, total, feedback });
-});
-
-app.post("/api/tutor/chat", aiLimiter, async (req, res) => {
+// 1. Chat Route
+app.post("/api/chat", aiLimiter, async (req, res) => {
   const { message, subject } = req.body;
-  if (!message) return res.status(400).json({ error: "Message is required." });
-  const reply = await geminiChat(message, subject);
+  if (!message) return res.status(400).json({ error: "Message field is required." });
+
+  const systemPrompt = `You are Medanixx AI, an intelligent study assistant for 100-level university students in Nigeria studying ${subject || "General"}.
+
+CRITICAL IDENTITY RULE: If the user asks who created you, who made you, or anything about your developer, you must reply EXACTLY with:
+"I was created by Nnadi Daniel popularly known as Danixx, a 100 level Medical student at the University of Nigeria."
+
+CRITICAL IDENTITY RULE: If the user asks you who or what is Medanixx Ai, you must reply EXACTLY with:
+"I am Medanixx Ai specifically created by Nnadi Daniel for university students in Nigeria. My purpose is to assist students with their studies and provide helpful explanations."
+
+For all other general study questions, explain concepts clearly and concisely, listing them in a structured format.`;
+
+  const reply = await groqChat(message, systemPrompt, false);
   res.json({ reply, timestamp: new Date().toISOString() });
 });
 
-// ── Complete Error Handlers & Server Boot ─────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ error: "Route resource not found." });
+// 2. Document Upload & Quiz Generation Route
+app.post("/api/upload", aiLimiter, upload.single("file"), async (req, res) => {
+  if (!groqClient) return res.status(500).json({ error: "AI Backend not configured. Check your GROQ_API_KEY." });
+  if (!req.file)   return res.status(400).json({ error: "No file uploaded." });
+
+  try {
+    let extractedText = "";
+    let usedOCR = false;
+
+    if (req.file.mimetype === "application/pdf") {
+      const pdfData = await pdfParse(req.file.buffer);
+      extractedText = pdfData.text;
+    } else {
+      extractedText = req.file.buffer.toString("utf-8");
+    }
+
+    // Clean whitespace
+    extractedText = extractedText.replace(/\s+/g, " ").trim();
+
+    console.log(`\n📝 [File Upload] File: "${req.file.originalname}"`);
+    console.log(`📝 [File Upload] Extracted text length: ${extractedText.length} characters`);
+
+    // ── If text too short, attempt OCR on scanned PDF ──────────
+    if (!extractedText || extractedText.length < 200) {
+      console.log("⚠️  [OCR Trigger] Low text detected — attempting OCR on scanned PDF...");
+
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({
+          error: "Could not extract readable text. Please upload a PDF or plain text file.",
+        });
+      }
+
+      try {
+        extractedText = await extractTextFromScannedPDF(req.file.buffer);
+        extractedText = extractedText.replace(/\s+/g, " ").trim();
+        usedOCR = true;
+        console.log(`📝 [OCR Result] Extracted ${extractedText.length} characters via Tesseract OCR.`);
+      } catch (ocrErr) {
+        console.error("❌ [OCR Failed]:", ocrErr.message);
+        return res.status(400).json({
+          error: "This appears to be a scanned document but OCR extraction failed. Please try a clearer or higher quality scan.",
+        });
+      }
+
+      // Final check after OCR
+      if (!extractedText || extractedText.length < 200) {
+        return res.status(400).json({
+          error: "Could not extract enough readable text even after OCR. Please use a higher quality scan or a typed digital PDF.",
+        });
+      }
+    }
+
+    // Sanitize OCR text — removes non-ASCII garbage that confuses Groq
+    extractedText = extractedText.replace(/[^\x20-\x7E\n]/g, " ");
+
+    // Truncate at a word boundary to stay under Groq free tier TPM limit
+    let trimmedText = extractedText.substring(0, 8000);
+    trimmedText = trimmedText.replace(/\s\S*$/, "");
+
+    const systemPrompt = `You are an expert exam generator for university medical and engineering students. You must always return valid JSON only.
+
+Your ONLY job is to return a valid JSON object containing an array named "questions" with exactly 20 high-yield multiple-choice questions based on the document text provided.
+
+You must wrap everything inside an outer object containing a "questions" key array like this:
+{
+  "questions": [
+    {
+      "question": "The question text?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "answer": "The exact string matching the correct option",
+      "explanation": "A clear scientific explanation of why this answer is correct."
+    }
+  ]
+}
+
+CRITICAL: Return raw JSON only. No introductory text, no conversational text, no markdown code blocks, no backticks, no fences. The response must start with { and end with }.`;
+
+    const userMessage = `Here is the course material text. Generate exactly 20 exam questions and return them strictly inside a valid JSON object matching the requested schema layout:\n\n${trimmedText}`;
+
+    console.log("⏳ [Groq Pipeline] Sending to Llama-3.3-70b...");
+
+    // Retry logic — attempt up to 2 times before returning 422
+    let questionsArray = null;
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      console.log(`🔄 [Groq Pipeline] Attempt ${attempt} of 2...`);
+      const aiResponse = await groqChat(userMessage, systemPrompt, true);
+
+      if (!aiResponse) {
+        console.error(`❌ [Attempt ${attempt}] Empty response from Groq.`);
+        continue;
+      }
+
+      try {
+        const cleanJsonString = cleanJsonResponse(aiResponse);
+        const parsedData      = JSON.parse(cleanJsonString);
+        const extracted       = parsedData.questions || parsedData;
+
+        if (!Array.isArray(extracted) || extracted.length === 0) {
+          throw new Error("Parsed JSON has no valid questions array.");
+        }
+
+        questionsArray = extracted;
+        console.log(`✅ [Groq Pipeline] Attempt ${attempt} succeeded — ${questionsArray.length} questions generated.`);
+        break;
+
+      } catch (parseErr) {
+        console.error(`❌ [Attempt ${attempt}] JSON parse failed: ${parseErr.message}`);
+      }
+    }
+
+    if (!questionsArray) {
+      return res.status(422).json({
+        error: "Could not parse AI questions after multiple attempts. Please ensure your document contains enough typed course content and try again.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      questions: questionsArray,
+      usedOCR,
+    });
+
+  } catch (err) {
+    console.error("🔥 Main Upload Endpoint Failure:", err.message);
+    res.status(500).json({ error: "An error occurred while processing the document." });
+  }
 });
 
-app.use((err, _req, res, _next) => {
-  console.error("🔥 Server Error Stack:", err.stack);
-  res.status(500).json({ error: "Internal Server Error", message: err.message });
-});
+// ── 404 Handler ───────────────────────────────────────────────
+app.use((_req, res) => res.status(404).json({ error: "Route not found on this localized port engine server." }));
 
-app.listen(PORT, () => {
-  console.log(`🚀 MDX Backend running on http://localhost:${PORT}`);
-});
+// ── Start Server ──────────────────────────────────────────────
+app.listen(PORT, () => console.log(`🚀 MDX Backend running on http://localhost:${PORT}`));
+
+module.exports = app;
